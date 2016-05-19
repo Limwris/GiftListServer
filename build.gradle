@@ -1,0 +1,54 @@
+group 'com.nichesoftware'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'war'
+apply plugin: 'jetty'
+apply plugin: 'idea'
+
+// Sources:   - http://www.frommknecht.net/project-template-gradle-groovy-spring-3-hibernate-4-hsqldb-and-logback/
+//            - http://stackoverflow.com/questions/20039333/how-to-spring-3-2-hibernate-4-on-javaconfig-correctly
+//            - https://github.com/tobrien/blog-example
+
+sourceCompatibility = 1.7
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Spring
+	compile 'org.springframework:spring-webmvc:4.1.6.RELEASE'
+	// Jackson, in order to return JSON
+	compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.12'
+	// Gson
+	compile 'com.google.code.gson:gson:2.6.2'
+	// Base64
+	compile 'commons-codec:commons-codec:1.10'
+	// JDBC connector
+	compile 'mysql:mysql-connector-java:5.1.38'
+
+    // Unit test
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    // DB unit
+    testCompile 'org.dbunit:dbunit:2.5.2'
+    // Mockito
+    testCompile 'org.mockito:mockito-all:1.10.19'
+}
+
+war {
+    webInf {
+        include "src/main/webapp/resources/**"
+    }
+}
+
+// Embeded Jetty for testing
+jettyRun {
+	contextPath = "giftlist"
+	httpPort = 8080
+}
+
+jettyRunWar {
+	contextPath = "giftlist"
+	httpPort = 8080
+}

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+    <user_data id="1" username="ap" password="pass" creation_date="2009-02-10" />
+    <user_data id="2" username="rr" password="secret" creation_date="2009-02-12" />
+    <persons id="1" firstname="jean-luc" lastname="girard" />
+    <persons id="2" firstname="jean-bernard" lastname="alfonso" />
+    <user_persons user_id="1" person_id="1" />
+    <user_persons user_id="2" person_id="2" />
+    <gifts name="PS4" price="399" person_id="1" />
+    <gifts name="Ours en peluche" price="29.99" person_id="2" />
+    <gifts name="Train" price="129" person_id="1" />
+    <user_gifts user_id="1" gift_id="1" allocated_amount="40" />
+    <user_gifts user_id="2" gift_id="2" allocated_amount="10" />
+</dataset>
