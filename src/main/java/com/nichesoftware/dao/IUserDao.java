@@ -8,11 +8,10 @@ import com.nichesoftware.model.User;
  * Created by n_che on 28/04/2016.
  */
 public interface IUserDao {
-    String ID_ROW = "id";
+    String ID_ROW = "idUser";
     String USERNAME_ROW = "username";
     String PASSWORD_ROW = "password";
-    String CREATION_DATE_ROW = "creation_date";
-    String PERSONS_ROW = "persons";
+    String CREATION_DATE_ROW = "creationDate";
 
     // Create user
     void createUser(User user) throws GenericException, ServerException;

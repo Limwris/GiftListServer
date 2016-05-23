@@ -27,10 +27,10 @@ public class User {
     @JsonIgnore
     private String password;
     /**
-     * Liste des personnes
+     * Liste des salles
      */
     @JsonIgnore
-    private List<Person> persons = new ArrayList<>();
+    private List<Room> rooms = new ArrayList<>();
     /**
      * Date de création de l'utilisateur
      * Utile pour générer le token
@@ -54,7 +54,7 @@ public class User {
 
     /**
      * Setter sur l'identifiant unique de l'utilisateur
-     * @param id
+     * @param id - identfiant de l'utilisateur
      */
     public void setId(int id) {
         this.id = id;
@@ -70,7 +70,7 @@ public class User {
 
     /**
      * Setter sur l'identifiant de l'utilisateur
-     * @param username
+     * @param username - identfiant de l'utilisateur
      */
     public void setUsername(String username) {
         this.username = username;
@@ -86,26 +86,27 @@ public class User {
 
     /**
      * Setter sur le mot de passe de l'utilisateur
-     * @param password
+     * @param password - mot de passe de l'utilisateur
      */
     public void setPassword(String password) {
         this.password = password;
     }
 
+
     /**
-     * Getter sur la liste des personnes
-     * @return persons
+     * Getter sur la liste des salles
+     * @return rooms
      */
-    public List<Person> getPersons() {
-        return persons;
+    public List<Room> getRooms() {
+        return rooms;
     }
 
     /**
-     * Setter sur la liste des personnes
-     * @param persons
+     * Setter sur la liste des salles
+     * @param rooms - liste des salles de l'utilisateur
      */
-    public void setPersons(List<Person> persons) {
-        this.persons = persons;
+    public void setRooms(List<Room> rooms) {
+        this.rooms = rooms;
     }
 
     public Date getCreationDate() {
@@ -117,27 +118,27 @@ public class User {
     }
 
     /**
-     * Recherche une personne dans la liste des personnes de l'utilisateur
-     * @param personId
-     * @return
+     * Recherche une salle dans la liste des salles de l'utilisateur
+     * @param roomId - identifiant de la salle recherchée
+     * @return room  - salle correspondant à l'identifiant passé en paramètre, nul sinon
      */
-    public Person getPersonById(final int personId) {
-        for (Person person : persons) {
-            if (person.getId() == personId) {
-                return person;
+    public Room getRoomById(final int roomId) {
+        for (Room room : rooms) {
+            if (room.getId() == roomId) {
+                return room;
             }
         }
         return null;
     }
 
     /**
-     * Ajoute une personne à la liste
-     * @param person
+     * Ajoute une salle à la liste
+     * @param room - Salle à ajouter à la liste de l'utilisateur
      */
-    public void addPerson(Person person) {
-        if (persons == null) {
-            persons = new ArrayList<>();
+    public void addRoom(Room room) {
+        if (rooms == null) {
+            rooms = new ArrayList<>();
         }
-        persons.add(person);
+        rooms.add(room);
     }
 }

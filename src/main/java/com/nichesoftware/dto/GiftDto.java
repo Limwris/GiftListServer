@@ -17,9 +17,9 @@ public class GiftDto {
      */
     private double amount;
     /**
-     * Identifiant unique de la personne à laquelle est rattaché le cadeau
+     * Identifiant unique de la salle à laquelle est rattaché le cadeau
      */
-    private int personId;
+    private int roomId;
 
     /**
      * Getter sur le montant du cadeau
@@ -70,18 +70,18 @@ public class GiftDto {
     }
 
     /**
-     * Getter sur l'identifiant unique de la personne associée
-     * @return personId
+     * Getter sur l'identifiant unique de la salle associée
+     * @return roomId
      */
-    public int getPersonId() {
-        return personId;
+    public int getRoomId() {
+        return roomId;
     }
 
     /**
-     * Setter sur l'identifiant unique de la personne associée
-     * @param personId
+     * Setter sur l'identifiant unique de la salle associée
+     * @param roomId
      */
-    public void setPersonId(int personId) {
-        this.personId = personId;
+    public void setRoomId(int roomId) {
+        this.roomId = roomId;
     }
 }

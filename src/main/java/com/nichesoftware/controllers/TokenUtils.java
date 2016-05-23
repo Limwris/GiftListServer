@@ -18,7 +18,7 @@ import java.util.Arrays;
 public final class TokenUtils {
     private static final String SEPARATOR = ".";
     private static final String ESCAPED_SEPARATOR = "\\.";
-    private static final String HMAC_KEY = "";
+    private static final String HMAC_KEY = "Bonjour, mon nom est Scott Summers, et je suis un X-MEN";
     private static final String HMAC_ALGORITHM = "HmacSHA1";
 
     /**

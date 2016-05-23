@@ -24,7 +24,7 @@ public class UserDao extends AbstractDaoJdbc implements IUserDao {
         try {
             cx = getConnection();
 
-            String sql = "SELECT id, username, password, creation_date FROM user_data WHERE username = ?";
+            String sql = "SELECT idUser, username, password, creationDate FROM user WHERE username = ?";
 
             ps = cx.prepareStatement(sql);
             ps.setString(1, username); // (1,..) premier point d'interrogation
@@ -61,7 +61,7 @@ public class UserDao extends AbstractDaoJdbc implements IUserDao {
         try {
             cx = getConnection();
 
-            String sql = "INSERT INTO user_data(username, password, creation_date) VALUES (?, ?, ?);";
+            String sql = "INSERT INTO user(username, password, creationDate) VALUES (?, ?, ?);";
             ps = cx.prepareStatement(sql);
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getPassword());

@@ -30,9 +30,9 @@ public class AbstractDaoJdbc {
     protected Connection getConnectionDM() throws ClassNotFoundException, SQLException {
         Connection cx;
         Class.forName("com.mysql.jdbc.Driver");
-        String url = "jdbc:mysql://localhost:3306/giftlist";
+        String url = "jdbc:mysql://localhost:3306/giftlistserver";
 
-        cx = DriverManager.getConnection(url, "", "");
+        cx = DriverManager.getConnection(url, "scott", "summers");
         return cx;
     }
 

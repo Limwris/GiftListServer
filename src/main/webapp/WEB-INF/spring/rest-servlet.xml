@@ -15,10 +15,10 @@
 
     <bean id="restService" class="com.nichesoftware.services.RestService">
         <property name="userDao" ref="userDao" />
-        <property name="personDao" ref="personDao" />
+        <property name="roomDao" ref="roomDao" />
         <property name="giftDao" ref="giftDao" />
     </bean>
     <bean id="userDao" class="com.nichesoftware.dao.UserDao"/>
-    <bean id="personDao" class="com.nichesoftware.dao.PersonDao"/>
+    <bean id="roomDao" class="com.nichesoftware.dao.RoomDao"/>
     <bean id="giftDao" class="com.nichesoftware.dao.GiftDao"/>
 </beans>

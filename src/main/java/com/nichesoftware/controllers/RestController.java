@@ -1,10 +1,10 @@
 package com.nichesoftware.controllers;
 
 import com.nichesoftware.dto.GiftDto;
-import com.nichesoftware.dto.PersonDto;
+import com.nichesoftware.dto.RoomDto;
 import com.nichesoftware.dto.UserDto;
 import com.nichesoftware.model.Gift;
-import com.nichesoftware.model.Person;
+import com.nichesoftware.model.Room;
 import com.nichesoftware.model.User;
 import com.nichesoftware.services.IRestService;
 import com.nichesoftware.services.RestService;
@@ -37,65 +37,35 @@ public class RestController {
         this.restService = restService;
     }
 
-    @RequestMapping(value = "persons", method = RequestMethod.GET)
+    @RequestMapping(value = "gifts", method = RequestMethod.GET)
     @ResponseBody
-    public List<Person> getPersons(@RequestHeader(value="X-Auth-Token") String token) throws Exception {
+    public boolean inviteUserToRoom(@RequestHeader(value="X-Auth-Token") String token, @RequestBody RoomDto roomDto) throws Exception {
         User user = TokenUtils.getUserFromToken(token);
-
-        return restService.getAllPersons(user.getUsername());
-    }
-
-    @RequestMapping(value = "person", method = RequestMethod.POST)
-    @ResponseBody
-    public boolean addPerson(@RequestHeader(value="X-Auth-Token") String token, @RequestBody PersonDto personDto) throws Exception {
-        User user = TokenUtils.getUserFromToken(token);
-        restService.addPerson(user.getUsername(), personDto.getFirstName(), personDto.getLastName());
-        // Si aucune exception n'a été levée
+        restService.inviteUserToRoom(user.getUsername(), roomDto.getRoomId());
         return true;
-    }
-
-    @RequestMapping(value = "person", method = RequestMethod.GET)
-    @ResponseBody
-    public List<Person> getPersons(@RequestHeader(value="X-Auth-Token") String token, @RequestBody PersonDto personDto) throws Exception {
-        User user = TokenUtils.getUserFromToken(token);
-        return restService.getPersons(user.getUsername(), personDto.getFirstName(), personDto.getLastName());
     }
 
     @RequestMapping(value = "gifts", method = RequestMethod.GET)
     @ResponseBody
-    public List<Person> getGifts(@RequestHeader(value="X-Auth-Token") String token) throws Exception {
+    public List<Gift> getGifts(@RequestHeader(value="X-Auth-Token") String token, @RequestBody RoomDto roomDto) throws Exception {
         User user = TokenUtils.getUserFromToken(token);
-        return restService.getGifts(user.getUsername());
+        return restService.getGifts(user.getUsername(), roomDto.getRoomId());
     }
 
-    @RequestMapping(value = "gifts", method = RequestMethod.POST)
+    @RequestMapping(value = "rooms", method = RequestMethod.POST)
     @ResponseBody
-    public boolean addGift(@RequestHeader(value="X-Auth-Token") String token, @RequestBody GiftDto giftDto) throws Exception {
+    public boolean getRooms(@RequestHeader(value="X-Auth-Token") String token, @RequestBody GiftDto giftDto) throws Exception {
         User user = TokenUtils.getUserFromToken(token);
-        restService.addGift(user.getUsername(), giftDto.getPersonId(), giftDto.getName(), giftDto.getPrice(), giftDto.getAmount());
-
+        restService.getRooms(user.getUsername());
         return true;
     }
 
-    @RequestMapping(value = "lulu", method = RequestMethod.GET)
+    @RequestMapping(value = "gift", method = RequestMethod.POST)
     @ResponseBody
-    public List<Person> lulu(@RequestHeader(value="X-Auth-Token") String token) throws Exception {
-        List<Person> persons = new ArrayList<Person>();
-        List<Gift> gifts = new ArrayList<Gift>();
-        Gift gift = new Gift(1);
-        gift.setName("Ours en peluche");
-        gift.setPrice(22.05);
-        gift.setAmount(10);
-        gifts.add(gift);
-        gift = new Gift(2);
-        gift.setName("Playstation 8");
-        gift.setPrice(455.99);
-        gift.setAmount(60);
-        gifts.add(gift);
-        persons.add(new Person(0, "John", "Doe", gifts));
-        persons.add(new Person(1, "Jane", "Doe"));
-        persons.add(new Person(2, "Jean-Charles", "Dupond"));
-        return persons;
+    public boolean addGift(@RequestHeader(value="X-Auth-Token") String token, @RequestBody GiftDto giftDto) throws Exception {
+        User user = TokenUtils.getUserFromToken(token);
+        restService.addGift(user.getUsername(), giftDto.getRoomId(), giftDto.getName(), giftDto.getPrice(), giftDto.getAmount());
+        return true;
     }
 
     @RequestMapping(value = "authentication", method = RequestMethod.POST)
@@ -119,7 +89,26 @@ public class RestController {
         User user = restService.createUser(userDto.getUsername(), userDto.getPassword());
         final String token = TokenUtils.generateToken(user);
         return token;
-
     }
 
+    @RequestMapping(value = "lulu", method = RequestMethod.GET)
+    @ResponseBody
+    public List<Room> lulu(@RequestHeader(value="X-Auth-Token") String token) throws Exception {
+        List<Room> rooms = new ArrayList<>();
+        List<Gift> gifts = new ArrayList<>();
+        Gift gift = new Gift(1);
+        gift.setName("Ours en peluche");
+        gift.setPrice(22.05);
+        gift.setAmount(10);
+        gifts.add(gift);
+        gift = new Gift(2);
+        gift.setName("Playstation 8");
+        gift.setPrice(455.99);
+        gift.setAmount(60);
+        gifts.add(gift);
+        rooms.add(new Room(0, "John", "Doe", gifts));
+        rooms.add(new Room(1, "Jane", "Doe"));
+        rooms.add(new Room(2, "Jean-Charles", "Dupond"));
+        return rooms;
+    }
 }

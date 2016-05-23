@@ -1,16 +1,15 @@
 package com.nichesoftware.services;
 
 import com.nichesoftware.dao.IGiftDao;
-import com.nichesoftware.dao.IPersonDao;
+import com.nichesoftware.dao.IRoomDao;
 import com.nichesoftware.dao.IUserDao;
 import com.nichesoftware.model.Gift;
-import com.nichesoftware.model.Person;
+import com.nichesoftware.model.Room;
 import com.nichesoftware.model.User;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -36,7 +35,7 @@ public class RestServiceTest {
     @Mock
     private IUserDao userDao;
     @Mock
-    private IPersonDao personDao;
+    private IRoomDao roomDao;
 
     @Before
     public void setUp() {
@@ -47,11 +46,11 @@ public class RestServiceTest {
     public void itShouldAddGift() throws Exception {
         // Arange
         User user = new User();
-        final Person person = new Person(1, "Prenom", "Nom");
-        List<Person> persons = new ArrayList<>();
-        persons.add(person);
+        final Room room = new Room(1, "Prenom", "Nom");
+        List<Room> rooms = new ArrayList<>();
+        rooms.add(room);
         when(userDao.findByUsername(anyString())).thenReturn(user);
-        when(personDao.getAllPersons(anyString())).thenReturn(persons);
+        when(roomDao.getAllRooms(eq(user))).thenReturn(rooms);
         Mockito.doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -59,19 +58,19 @@ public class RestServiceTest {
                 gift.setAmount(0);
                 gift.setPrice(129);
                 gift.setName("Train");
-                person.addGift(gift);
+                room.addGift(gift);
                 return null;
             }
-        }).when(giftDao).addGift(eq(user), any(Person.class), anyString(), anyDouble(), anyDouble());
+        }).when(giftDao).addGift(eq(user), any(Room.class), anyString(), anyDouble(), anyDouble());
 
 
         // Act
         sut.addGift("jean-pierre", 1, "Train", 129, 0);
 
         // Assert
-        verify(giftDao).addGift(eq(user), any(Person.class), anyString(), anyDouble(), anyDouble());
-        Assert.assertEquals("Le cadeau n'a pas été correctement ajouté.", person.getGiftList().size(), 1);
-        Assert.assertEquals("Le nom du cadeau ne correspond pas.", person.getGiftList().get(0).getName(), "Train");
+        verify(giftDao).addGift(eq(user), any(Room.class), anyString(), anyDouble(), anyDouble());
+        Assert.assertEquals("Le cadeau n'a pas été correctement ajouté.", room.getGiftList().size(), 1);
+        Assert.assertEquals("Le nom du cadeau ne correspond pas.", room.getGiftList().get(0).getName(), "Train");
     }
 
     @After

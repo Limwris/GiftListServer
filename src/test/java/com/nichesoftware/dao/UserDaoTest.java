@@ -5,7 +5,6 @@ import com.nichesoftware.model.User;
 import org.dbunit.Assertion;
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.database.IDatabaseConnection;
-import org.dbunit.dataset.FilteredTableMetaData;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.filter.DefaultColumnFilter;
@@ -35,7 +34,7 @@ public class UserDaoTest {
 
     private IDatabaseConnection getConnection() throws Exception {
         Class.forName("com.mysql.jdbc.Driver");
-        String url = "jdbc:mysql://localhost:3306/giftlist";
+        String url = "jdbc:mysql://localhost:3306/giftlistserver";
         Connection cn = DriverManager.getConnection(url, "scott", "summers");
         IDatabaseConnection cx = new DatabaseConnection(cn);
 
@@ -49,7 +48,6 @@ public class UserDaoTest {
         IDatabaseConnection dbConnection = getConnection();
         FlatXmlDataSetBuilder builder = new FlatXmlDataSetBuilder();
         ClassLoader classLoader = getClass().getClassLoader();
-//        IDataSet data = builder.build(new File(classLoader.getResource("user_data.xml").getFile()));
         IDataSet data = builder.build(new File(classLoader.getResource("data.xml").getFile()));
 //        IDataSet fullDataSet = new FilteredDataSet(new DatabaseSequenceFilter(dbConnection), data);
 
@@ -107,21 +105,21 @@ public class UserDaoTest {
 
         // Lecture données actuelles
         IDataSet databaseDataSet = getConnection().createDataSet();
-        ITable actualTable = databaseDataSet.getTable("user_data");
+        ITable actualTable = databaseDataSet.getTable("user");
 
         // Lecture des données attendues
         ClassLoader classLoader = getClass().getClassLoader();
-        File expected = new File(classLoader.getResource("expected_user_data.xml").getFile());
+        File expected = new File(classLoader.getResource("expected_user.xml").getFile());
         IDataSet expectedDataSet = new FlatXmlDataSetBuilder().build(expected);
 //        IDataSet fullDataSet = new FilteredDataSet(new DatabaseSequenceFilter(getConnection()), expectedDataSet);
-        ITable expectedTable = expectedDataSet.getTable("user_data");
+        ITable expectedTable = expectedDataSet.getTable("user");
 //        ITable expectedTable = fullDataSet.getTable("user_data");
 
         // Vérification données attendues / données actuelles
         // en comparant uniquement les colonnes listées dans
         // le fichier des données attendues
 //        ITable filteredTable = DefaultColumnFilter.includedColumnsTable(actualTable, expectedTable.getTableMetaData().getColumns());
-        ITable filteredTable = DefaultColumnFilter.excludedColumnsTable(actualTable, new String[] {"id"});
+        ITable filteredTable = DefaultColumnFilter.excludedColumnsTable(actualTable, new String[] {"idUser"});
         Assertion.assertEquals(expectedTable, filteredTable);
     }
 

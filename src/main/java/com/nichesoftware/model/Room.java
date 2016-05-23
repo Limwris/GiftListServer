@@ -2,82 +2,81 @@ package com.nichesoftware.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
- * Created by n_che on 27/04/2016.
+ * Created by Kattleya on 22/05/2016.
  */
-public class Person {
+public class Room {
     /**
-     * Identifiant unique de la personne
+     * Identifiant unique de la salle
      */
     private int id;
     /**
-     * Prénom
+     * Nom de la salle
+     */
+    private String roomName;
+    /**
+     * Prénom de la personne concernée par la salle
      */
     private String firstName;
     /**
-     * Nom
+     * Nom de la personne concernée par la salle
      */
     private String lastName;
-
+    /**
+     * Occasion du cadeau
+     */
+    private String occasion;
     /**
      * Liste des cadeaux associés à cette personne
      */
     private List<Gift> giftList = new ArrayList<Gift>();
 
-    /**
-     * Contructeur par défaut
-     * @param firstName
-     * @param lastName
-     */
-//    public Person(final String firstName, final String lastName) {
-//        this.id = UUID.randomUUID().toString();
-//        this.firstName = firstName;
-//        this.lastName = lastName;
-//    }
-
-    /**
-     * Contructeur avec liste de cadeau
-     * @param firstName
-     * @param lastName
-     * @param gifts
-     */
-//    public Person(final String firstName, final String lastName, List<Gift> gifts) {
-//        this.id = UUID.randomUUID().toString();
-//        this.firstName = firstName;
-//        this.lastName = lastName;
-//        this.giftList = gifts;
-//    }
 
     /**
      * Contructeur par défaut
      * @param id
-     * @param firstName
-     * @param lastName
+     * @param roomName
+     * @param occasion
      */
-    public Person(final int id, final String firstName, final String lastName) {
+    public Room(final int id, final String roomName, final String occasion) {
         this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.roomName = roomName;
+        this.occasion = occasion;
     }
 
     /**
      * Contructeur avec liste de cadeau
      * @param id
-     * @param firstName
-     * @param lastName
+     * @param roomName
+     * @param occasion
      * @param gifts
      */
-    public Person(final int id, final String firstName, final String lastName, List<Gift> gifts) {
+    public Room(final int id, final String roomName, final String occasion, List<Gift> gifts) {
         this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.roomName = roomName;
+        this.occasion = occasion;
         this.giftList = gifts;
     }
 
     /**
-     * Getter sur le prénom
+     * Getter sur le nom de la salle
+     * @return roomName
+     */
+    public String getRoomName() {
+        return roomName;
+    }
+
+    /**
+     * Setter sur le nom de la salle
+     * @param roomName
+     */
+    public void setRoomName(String roomName) {
+        this.roomName = roomName;
+    }
+
+    /**
+     * Getter sur le prénom de la personne concernée par la salle
      * @return firstName
      */
     public String getFirstName() {
@@ -85,7 +84,7 @@ public class Person {
     }
 
     /**
-     * Setter sur le prénom
+     * Setter sur le prénom de la personne concernée par la salle
      * @param firstName
      */
     public void setFirstName(String firstName) {
@@ -93,7 +92,7 @@ public class Person {
     }
 
     /**
-     * Getter sur le nom
+     * Getter sur le nom de la personne concernée par la salle
      * @return lastName
      */
     public String getLastName() {
@@ -101,7 +100,7 @@ public class Person {
     }
 
     /**
-     * Setter sur le nom
+     * Setter sur le nom de la personne concernée par la salle
      * @param lastName
      */
     public void setLastName(String lastName) {
@@ -130,6 +129,22 @@ public class Person {
      */
     public int getId() {
         return id;
+    }
+
+    /**
+     * Getter sur l'occasion du cadeau
+     * @return occasion
+     */
+    public String getOccasion() {
+        return occasion;
+    }
+
+    /**
+     * Setter sur l'occasion du cadeau
+     * @param occasion
+     */
+    public void setOccasion(String occasion) {
+        this.occasion = occasion;
     }
 
     /**
