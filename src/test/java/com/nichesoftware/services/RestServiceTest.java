@@ -55,7 +55,6 @@ public class RestServiceTest {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Gift gift = new Gift(0);
-                gift.setAmount(0);
                 gift.setPrice(129);
                 gift.setName("Train");
                 room.addGift(gift);

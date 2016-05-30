@@ -2,7 +2,6 @@ package com.nichesoftware.dao;
 
 import com.nichesoftware.exceptions.GenericException;
 import com.nichesoftware.exceptions.ServerException;
-import com.nichesoftware.model.Gift;
 import com.nichesoftware.model.Room;
 import com.nichesoftware.model.User;
 import com.nichesoftware.utils.StringUtils;
@@ -24,7 +23,7 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
         try {
             cx = getConnection();
 
-            String sql = "INSERT INTO user_room(room_id, user_id) VALUES (?, ?);";
+            final String sql = "INSERT INTO user_room(roomId, userId) VALUES (?, ?);";
             ps = cx.prepareStatement(sql);
             ps.setInt(1, room.getId());
             ps.setInt(2, user.getId());
@@ -47,7 +46,8 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
     }
 
     @Override
-    public void saveRoom(User user, String roomName, String occasion, String firstName, String lastName) throws ServerException, GenericException {
+    public void saveRoom(User user, final String roomName,
+                         final String occasion) throws ServerException, GenericException {
         Connection cx = null;
         PreparedStatement ps = null;
 
@@ -67,7 +67,7 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
             if (rs.next()) {
                 int roomId = rs.getInt(1);
 
-                String sql_foreign_key = "INSERT INTO user_room(room_id, user_id) VALUES (?, ?);";
+                String sql_foreign_key = "INSERT INTO user_room(roomId, userId) VALUES (?, ?);";
                 ps = cx.prepareStatement(sql_foreign_key);
                 ps.setInt(1, roomId);
                 ps.setInt(2, user.getId());
@@ -99,7 +99,7 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
             cx = getConnection();
 
             // L'utilisateur doit être préalablement ajouté à la salle
-            String sql = "SELECT room.id, room.roomName, room.occasion FROM room JOIN user_room ON user_room.room_id = room.id JOIN user ON user.id = user_room.user_id WHERE user.username = ? AND room.id = ?";
+            String sql = "SELECT R.idRoom, R.roomName, R.occasion FROM room AS R JOIN user_room AS UR ON UR.roomId = R.idRoom JOIN user AS U ON U.idUser = UR.userId WHERE U.username = ? AND R.idRoom = ?";
 
             ps = cx.prepareStatement(sql);
             ps.setString(1, user.getUsername()); // (1,..) premier point d'interrogation
@@ -134,7 +134,7 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
 
         try {
             cx = getConnection();
-            String sql = "SELECT room.id, room.roomName, room.occasion FROM room JOIN user_room ON user_room.room_id = room.id JOIN user ON user.id = user_room.user_id WHERE user.username = ?";
+            String sql = "SELECT room.idRoom, room.roomName, room.occasion FROM room JOIN user_room ON user_room.roomId = room.idRoom JOIN user ON user.idUser = user_room.userId WHERE user.username = ?";
 
             ps = cx.prepareStatement(sql);
             ps.setString(1, user.getUsername()); // (1,..) premier point d'interrogation

@@ -12,10 +12,26 @@ import java.util.List;
  * Created by n_che on 28/04/2016.
  */
 public interface IRestService {
-    void addGift(final String username, int roomId, final String giftName, double giftPrice, double allocatedAmount) throws GenericException, ServerException;
+    /******************************************************************************************************************/
+    /********************                              Gift                                        ********************/
+    /******************************************************************************************************************/
+    void addGift(final String username, int roomId, final String giftName, double giftPrice, double allocatedAmount)
+            throws GenericException, ServerException;
     List<Gift> getGifts(final String username, int roomId) throws GenericException, ServerException;
-    User createUser(final String username, final String password) throws GenericException, ServerException;
-    User authenticate(final String username, final String password) throws GenericException, ServerException;
+    void deleteGift(final String username, int giftId) throws ServerException, GenericException;
+
+    /******************************************************************************************************************/
+    /********************                              Room                                        ********************/
+    /******************************************************************************************************************/
+    void addRoom(final String username, final String roomName, final String occasion)
+            throws ServerException, GenericException;
     void inviteUserToRoom(final String username, int roomId) throws ServerException, GenericException;
     List<Room> getRooms(final String username) throws ServerException, GenericException;
+    void deleteRoom(final String username, int roomId) throws ServerException, GenericException;
+
+    /******************************************************************************************************************/
+    /********************                              User                                        ********************/
+    /******************************************************************************************************************/
+    User createUser(final String username, final String password) throws GenericException, ServerException;
+    User authenticate(final String username, final String password) throws GenericException, ServerException;
 }

@@ -1,5 +1,8 @@
 package com.nichesoftware.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by n_che on 27/04/2016.
  */
@@ -25,10 +28,9 @@ public class Gift {
      */
     private boolean isBought;
     /**
-     * Montant alloué par l'utilisateur au cadeau
+     * Montants alloués par utilisateur au cadeau
      */
-    private double amount;
-
+    private Map<User, Double> amountByUser = new HashMap<>();
 
     /**
      * Constructeur
@@ -110,18 +112,18 @@ public class Gift {
     }
 
     /**
-     * Getter sur le montant alloué par l'utilisateur au cadeau
-     * @return amount
+     * Getter sur les montants alloués par utilisateur au cadeau
+     * @return
      */
-    public double getAmount() {
-        return amount;
+    public Map<User, Double> getAmountByUser() {
+        return amountByUser;
     }
 
     /**
-     * Setter sur le montant alloué par l'utilisateur au cadeau
-     * @param amount
+     * Setter sur les montants alloués par utilisateur au cadeau
+     * @param amountByUser
      */
-    public void setAmount(double amount) {
-        this.amount = amount;
+    public void setAmountByUser(Map<User, Double> amountByUser) {
+        this.amountByUser = amountByUser;
     }
 }

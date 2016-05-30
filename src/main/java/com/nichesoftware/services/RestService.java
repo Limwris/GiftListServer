@@ -23,7 +23,8 @@ public class RestService implements IRestService {
     private IUserDao userDao;
 
     @Override
-    public void addGift(final String username, int roomId, final String giftName, double giftPrice, double allocatedAmount) throws GenericException, ServerException {
+    public void addGift(final String username, int roomId, final String giftName,
+                        double giftPrice, double allocatedAmount) throws GenericException, ServerException {
         User user = userDao.findByUsername(username);
         if(user == null) {
             throw new AuthenticationException();
@@ -41,7 +42,6 @@ public class RestService implements IRestService {
 
     @Override
     public List<Gift> getGifts(final String username, int roomId) throws GenericException, ServerException {
-//        IUserDao userDao = new UserDao();
         User user = userDao.findByUsername(username);
         if(user == null) {
             throw new AuthenticationException();
@@ -53,8 +53,17 @@ public class RestService implements IRestService {
     }
 
     @Override
-    public User createUser(String username, String password) throws GenericException, ServerException {
-//        IUserDao userDao = new UserDao();
+    public void deleteGift(String username, int giftId) throws ServerException, GenericException {
+        User user = userDao.findByUsername(username);
+        if(user == null) {
+            throw new AuthenticationException();
+        }
+
+        giftDao.deleteGift(user, giftId);
+    }
+
+    @Override
+    public User createUser(final String username, final String password) throws GenericException, ServerException {
         User user = new User();
         user.setUsername(username);
         user.setPassword(password);
@@ -79,7 +88,7 @@ public class RestService implements IRestService {
      * @throws ServerException
      */
     @Override
-    public User authenticate(String username, String password) throws GenericException, ServerException {
+    public User authenticate(final String username, final String password) throws GenericException, ServerException {
         User user = userDao.findByUsername(username);
 
         if(user == null || !user.getPassword().equals(password)) {
@@ -92,14 +101,44 @@ public class RestService implements IRestService {
     @Override
     public void inviteUserToRoom(final String username, int roomId) throws ServerException, GenericException {
         User user = userDao.findByUsername(username);
+        if(user == null) {
+            throw new AuthenticationException();
+        }
         Room room = roomDao.getRoom(user, roomId);
         roomDao.inviteUserToRoom(user, room);
     }
 
     @Override
-    public List<Room> getRooms(String username) throws ServerException, GenericException {
+    public List<Room> getRooms(final String username) throws ServerException, GenericException {
         User user = userDao.findByUsername(username);
+        if(user == null) {
+            throw new AuthenticationException();
+        }
         return roomDao.getAllRooms(user);
+    }
+
+    @Override
+    public void deleteRoom(String username, int roomId) throws ServerException, GenericException {
+        User user = userDao.findByUsername(username);
+        if(user == null) {
+            throw new AuthenticationException();
+        }
+        Room room = roomDao.getRoom(user, roomId);
+        if (room == null) {
+            throw new GenericException("La salle n'est pas présente dans la liste de l'utilisateur.");
+        }
+
+        roomDao.deleteRoom(room, user);
+    }
+
+    @Override
+    public void addRoom(final String username, final String roomName,
+                        final String occasion) throws ServerException, GenericException {
+        User user = userDao.findByUsername(username);
+        if(user == null) {
+            throw new AuthenticationException();
+        }
+        roomDao.saveRoom(user, roomName, occasion);
     }
 
     public IGiftDao getGiftDao() {

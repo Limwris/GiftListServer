@@ -30,15 +30,17 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
             rs = ps.executeQuery();
 
             while (rs.next()) {
-                Room temp = user.getRoomById(rs.getInt(ROOM_ID_ROW));
+                Room temp = user.getRoomById(rs.getInt(IRoomDao.ID_ROW));
                 if (temp == null) {
-                    temp = new Room(rs.getInt(ROOM_ID_ROW), rs.getString(ROOM_NAME_ROW), null);
+                    temp = new Room(rs.getInt(IRoomDao.ID_ROW), rs.getString(IRoomDao.NAME_ROW), null);
                     user.addRoom(temp);
                 }
                 Gift gift = new Gift(rs.getInt(ID_ROW));
-                gift.setAmount(rs.getDouble(PRICE_ROW));
+                gift.setPrice(rs.getDouble(PRICE_ROW));
                 gift.setName(rs.getString(NAME_ROW));
-                gift.setAmount(rs.getDouble(AMOUNT_ROW));
+                User userForGift = new User();
+                userForGift.setUsername(rs.getString(IUserDao.USERNAME_ROW));
+                gift.getAmountByUser().put(userForGift, rs.getDouble(AMOUNT_ROW));
                 temp.addGift(gift);
             }
 
@@ -51,6 +53,54 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
         } finally {
             close(cx, ps, rs);
         }
+    }
+
+    @Override
+    public Gift getGift(User user, int giftId) throws ServerException, GenericException {
+        Connection cx = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        Gift gift = null;
+
+        try {
+            cx = getConnection();
+            String sql = "SELECT G.*, UG.allocatedAmount, U.username FROM rooms AS R, gifts AS G, user_gifts, user AS U as UG WHERE G.roomId = R.idRoom AND R.idGifts = ? AND UG.roomId = R.idRoom AND UG.userId = ? AND UG.userId = U.idUser;";
+            ps = cx.prepareStatement(sql);
+            ps.setInt(1, giftId);
+            ps.setInt(2, user.getId());
+
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                if (rs.getString(ID_ROW).equals(giftId)) {
+                    if (gift == null) {
+                        gift = new Gift(giftId);
+                        gift.setName(rs.getString(NAME_ROW));
+                        gift.setPrice(rs.getFloat(PRICE_ROW));
+                    }
+                    User userForGift = new User();
+                    userForGift.setUsername(rs.getString(IUserDao.USERNAME_ROW));
+                    gift.getAmountByUser().put(userForGift, rs.getDouble(AMOUNT_ROW));
+                } else {
+                    throw new GenericException("Le cadeau n'a pas pu être récupéré.");
+                }
+            }
+
+        } catch (SQLException e) {
+            handleSqlException(e);
+        } catch (NamingException e) {
+            throw new GenericException();
+        } catch (ClassNotFoundException e) {
+            throw new GenericException();
+        } finally {
+            close(cx, ps, rs);
+        }
+
+        return gift;
+    }
+
+    @Override
+    public void deleteGift(User user, int giftId) throws ServerException, GenericException {
+        // Todo
     }
 
     @Override
@@ -106,11 +156,12 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
             ps = cx.prepareStatement(sql);
             ps.setInt(1, user.getId());
             ps.setInt(2, gift.getId());
-            ps.setDouble(3, gift.getAmount());
+            ps.setDouble(3, gift.getAmountByUser().get(user));
 
             int retVal = ps.executeUpdate();
 
             if (retVal != 1) {
+                throw new GenericException("La mise à jour du cadeau a échoué.");
             }
 
         } catch (SQLException e) {

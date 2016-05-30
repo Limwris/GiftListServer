@@ -37,7 +37,7 @@ public class RestController {
         this.restService = restService;
     }
 
-    @RequestMapping(value = "gifts", method = RequestMethod.GET)
+    @RequestMapping(value = "invite", method = RequestMethod.POST)
     @ResponseBody
     public boolean inviteUserToRoom(@RequestHeader(value="X-Auth-Token") String token, @RequestBody RoomDto roomDto) throws Exception {
         User user = TokenUtils.getUserFromToken(token);
@@ -52,12 +52,11 @@ public class RestController {
         return restService.getGifts(user.getUsername(), roomDto.getRoomId());
     }
 
-    @RequestMapping(value = "rooms", method = RequestMethod.POST)
+    @RequestMapping(value = "rooms", method = RequestMethod.GET)
     @ResponseBody
-    public boolean getRooms(@RequestHeader(value="X-Auth-Token") String token, @RequestBody GiftDto giftDto) throws Exception {
+    public List<Room> getRooms(@RequestHeader(value="X-Auth-Token") String token, @RequestBody GiftDto giftDto) throws Exception {
         User user = TokenUtils.getUserFromToken(token);
-        restService.getRooms(user.getUsername());
-        return true;
+        return restService.getRooms(user.getUsername());
     }
 
     @RequestMapping(value = "gift", method = RequestMethod.POST)
@@ -68,12 +67,35 @@ public class RestController {
         return true;
     }
 
+    @RequestMapping(value = "room", method = RequestMethod.POST)
+    @ResponseBody
+    public boolean addRoom(@RequestHeader(value="X-Auth-Token") String token, @RequestBody RoomDto roomDto) throws Exception {
+        User user = TokenUtils.getUserFromToken(token);
+        restService.addRoom(user.getUsername(), roomDto.getRoomName(), roomDto.getOccasion());
+        return true;
+    }
+
+    @RequestMapping(value = "gift", method = RequestMethod.DELETE)
+    @ResponseBody
+    public boolean deleteGift(@RequestHeader(value="X-Auth-Token") String token, @RequestBody GiftDto giftDto) throws Exception {
+        User user = TokenUtils.getUserFromToken(token);
+        restService.deleteGift(user.getUsername(), giftDto.getRoomId());
+        return true;
+    }
+
+    @RequestMapping(value = "room", method = RequestMethod.DELETE)
+    @ResponseBody
+    public boolean deleteRoom(@RequestHeader(value="X-Auth-Token") String token, @RequestBody RoomDto roomDto) throws Exception {
+        User user = TokenUtils.getUserFromToken(token);
+        restService.deleteRoom(user.getUsername(), roomDto.getRoomId());
+        return true;
+    }
+
     @RequestMapping(value = "authentication", method = RequestMethod.POST)
     @ResponseBody
     public String authenticate(@RequestBody final UserDto userDto) throws Exception {
         User user = restService.authenticate(userDto.getUsername(), userDto.getPassword());
-        final String token = TokenUtils.generateToken(user);
-        return token;
+        return TokenUtils.generateToken(user);
     }
 
     @RequestMapping(value = "authentication", method = RequestMethod.DELETE)
@@ -87,8 +109,7 @@ public class RestController {
     @ResponseBody
     public String register(@RequestBody final UserDto userDto) throws Exception {
         User user = restService.createUser(userDto.getUsername(), userDto.getPassword());
-        final String token = TokenUtils.generateToken(user);
-        return token;
+        return TokenUtils.generateToken(user);
     }
 
     @RequestMapping(value = "lulu", method = RequestMethod.GET)
@@ -96,19 +117,25 @@ public class RestController {
     public List<Room> lulu(@RequestHeader(value="X-Auth-Token") String token) throws Exception {
         List<Room> rooms = new ArrayList<>();
         List<Gift> gifts = new ArrayList<>();
+        User user1 = new User();
+        user1.setUsername("Jean-Bertrand");
+        User user2 = new User();
+        user2.setUsername("Marie-Pierre");
         Gift gift = new Gift(1);
         gift.setName("Ours en peluche");
         gift.setPrice(22.05);
-        gift.setAmount(10);
+        gift.getAmountByUser().put(user1, 7d);
+        gift.getAmountByUser().put(user2, 12d);
         gifts.add(gift);
         gift = new Gift(2);
         gift.setName("Playstation 8");
         gift.setPrice(455.99);
-        gift.setAmount(60);
+        gift.getAmountByUser().put(user1, 60d);
+        gift.getAmountByUser().put(user2, 35d);
         gifts.add(gift);
-        rooms.add(new Room(0, "John", "Doe", gifts));
-        rooms.add(new Room(1, "Jane", "Doe"));
-        rooms.add(new Room(2, "Jean-Charles", "Dupond"));
+        rooms.add(new Room(0, "John Doe", "Anniversaire", gifts));
+        rooms.add(new Room(1, "Jane Doe", "Noël"));
+        rooms.add(new Room(2, "Jean-Charles Dupond", "Pot de départ"));
         return rooms;
     }
 }
