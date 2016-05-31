@@ -156,4 +156,12 @@ public class RestService implements IRestService {
     public void setUserDao(IUserDao userDao) {
         this.userDao = userDao;
     }
+
+    public void setRoomDao(IRoomDao roomDao) {
+        this.roomDao = roomDao;
+    }
+
+    public IRoomDao getRoomDao() {
+        return roomDao;
+    }
 }

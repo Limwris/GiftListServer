@@ -30,7 +30,11 @@ public class Gift {
     /**
      * Montants alloués par utilisateur au cadeau
      */
-    private Map<User, Double> amountByUser = new HashMap<>();
+    private Map<Integer, Double> amountByUser = new HashMap<>();
+    /**
+     * Liste permettant de faire le lien entre la map des montants et les utilisateurs
+     */
+    private Map<Integer, User> userById = new HashMap<>();
 
     /**
      * Constructeur
@@ -115,7 +119,7 @@ public class Gift {
      * Getter sur les montants alloués par utilisateur au cadeau
      * @return
      */
-    public Map<User, Double> getAmountByUser() {
+    public Map<Integer, Double> getAmountByUser() {
         return amountByUser;
     }
 
@@ -123,7 +127,23 @@ public class Gift {
      * Setter sur les montants alloués par utilisateur au cadeau
      * @param amountByUser
      */
-    public void setAmountByUser(Map<User, Double> amountByUser) {
+    public void setAmountByUser(Map<Integer, Double> amountByUser) {
         this.amountByUser = amountByUser;
+    }
+
+    /**
+     * Getter sur la liste permettant de faire le lien entre la map des montants et les utilisateurs
+     * @return userById
+     */
+    public Map<Integer, User> getUserById() {
+        return userById;
+    }
+
+    /**
+     * Setter sur la liste permettant de faire le lien entre la map des montants et les utilisateurs
+     * @param userById
+     */
+    public void setUserById(Map<Integer, User> userById) {
+        this.userById = userById;
     }
 }
