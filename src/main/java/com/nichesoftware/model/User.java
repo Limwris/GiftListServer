@@ -1,7 +1,6 @@
 package com.nichesoftware.model;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.map.annotate.JsonView;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,7 +28,7 @@ public class User {
      * Liste des salles
      */
     @JsonIgnore
-    private List<Room> rooms = new ArrayList<>();
+    private List<Room> rooms;
     /**
      * Date de création de l'utilisateur
      * Utile pour générer le token

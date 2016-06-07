@@ -20,6 +20,7 @@ public final class TokenUtils {
     private static final String ESCAPED_SEPARATOR = "\\.";
     private static final String HMAC_KEY = "Bonjour, mon nom est Scott Summers, et je suis un X-MEN";
     private static final String HMAC_ALGORITHM = "HmacSHA1";
+    private static final String DATE_FORMAT = "yyyy-MM-dd";
 
     /**
      * Constructeur privé
@@ -29,7 +30,7 @@ public final class TokenUtils {
     }
 
     public static User getUserFromToken(String token) throws NotAuthorizedException {
-        final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
+        final Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
         final String[] parts = token.split(ESCAPED_SEPARATOR);
         User user = null;
         if (parts.length == 2 && parts[0].length() > 0 && parts[1].length() > 0) {
@@ -46,7 +47,7 @@ public final class TokenUtils {
 //                    }
                 }
             } catch (IllegalArgumentException e) {
-                throw new NotAuthorizedException("Impossible de retrouver le user à l'origine de la requête.");
+                throw new NotAuthorizedException("Impossible de retrouver l'utilisateur à l'origine de la requête.");
             }
         }
 
@@ -57,7 +58,7 @@ public final class TokenUtils {
     }
 
     public static String generateToken(User user) throws NotAuthorizedException {
-        final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
+        final Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
         byte[] userBytes = gson.toJson(user).getBytes();
         byte[] hash = createHmac(userBytes);
         final StringBuilder sb = new StringBuilder(170);
@@ -73,7 +74,7 @@ public final class TokenUtils {
         Mac mac;
         byte[] result;
         try {
-            mac = Mac.getInstance("HmacSHA1");
+            mac = Mac.getInstance(HMAC_ALGORITHM);
             mac.init(keySpec);
             result = mac.doFinal(message);
         } catch (NoSuchAlgorithmException e) {

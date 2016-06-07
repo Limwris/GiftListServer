@@ -30,7 +30,8 @@ public class RestService implements IRestService {
             throw new AuthenticationException();
         }
 
-        user.setRooms(roomDao.getAllRooms(user));
+        // Ajoute toutes les salles à l'utilisateur
+        roomDao.getAllRooms(user);
 
         Room room = user.getRoomById(roomId);
         if (room == null) {
@@ -47,9 +48,10 @@ public class RestService implements IRestService {
             throw new AuthenticationException();
         }
 
-        Room room = roomDao.getRoom(user, roomId);
+        roomDao.getRoom(user, roomId);
+        Room room = user.getRoomById(roomId);
         giftDao.getGifts(user, room);
-        return user.getRoomById(roomId).getGiftList();
+        return room.getGiftList();
     }
 
     @Override
@@ -104,7 +106,7 @@ public class RestService implements IRestService {
         if(user == null) {
             throw new AuthenticationException();
         }
-        Room room = roomDao.getRoom(user, roomId);
+        Room room = roomDao.getRoom(roomId);
         roomDao.inviteUserToRoom(user, room);
     }
 
@@ -114,7 +116,11 @@ public class RestService implements IRestService {
         if(user == null) {
             throw new AuthenticationException();
         }
-        return roomDao.getAllRooms(user);
+
+        // Ajoute toutes les salles à l'utilisateur
+        roomDao.getAllRooms(user);
+
+        return user.getRooms();
     }
 
     @Override
@@ -123,7 +129,10 @@ public class RestService implements IRestService {
         if(user == null) {
             throw new AuthenticationException();
         }
-        Room room = roomDao.getRoom(user, roomId);
+
+        roomDao.getRoom(user, roomId);
+        Room room = user.getRoomById(roomId);
+
         if (room == null) {
             throw new GenericException("La salle n'est pas présente dans la liste de l'utilisateur.");
         }

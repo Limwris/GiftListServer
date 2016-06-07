@@ -5,8 +5,6 @@ import com.nichesoftware.exceptions.ServerException;
 import com.nichesoftware.model.Room;
 import com.nichesoftware.model.User;
 
-import java.util.List;
-
 /**
  * Created by Kattleya on 22/05/2016.
  */
@@ -22,10 +20,11 @@ public interface IRoomDao {
     // Create
     void saveRoom(User user, final String roomName, final String occasion) throws ServerException, GenericException;
     // Retreive
-    Room getRoom(User user, final int id) throws ServerException, GenericException;
-    List<Room> getAllRooms(User user) throws ServerException, GenericException;
+    void getRoom(User user, final int id) throws ServerException, GenericException;
+    Room getRoom(int id) throws ServerException, GenericException;
+    void getAllRooms(User user) throws ServerException, GenericException;
     // Update
-    boolean updateRoom(Room room, User user) throws ServerException, GenericException;
+    void updateRoom(Room room, User user) throws ServerException, GenericException;
     // Delete
-    boolean deleteRoom(Room room, User user) throws ServerException, GenericException;
+    void deleteRoom(Room room, User user) throws ServerException, GenericException;
 }

@@ -22,7 +22,7 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
 
         try {
             cx = getConnection();
-            String sql = "SELECT U.username, U.idUser, R.roomName, UG.allocated_amount, G.* FROM giftlistserver.user AS U, giftlistserver.room AS R, giftlistserver.user_room AS UR, giftlistserver.gifts AS G, giftlistserver.user_gift AS UG WHERE U.idUser = UR.userId AND R.idRoom = UR.roomId AND G.roomId = R.idRoom AND UG.userId = U.idUser AND UG.giftId = G.idGifts AND U.username = ? AND R.idRoom = ?;";
+            String sql = "SELECT U.username, U.idUser, UG.allocatedAmount, G.* FROM giftlistserver.user AS U, giftlistserver.room AS R, giftlistserver.user_room AS UR, giftlistserver.gifts AS G, giftlistserver.user_gift AS UG WHERE U.idUser = UR.userId AND R.idRoom = UR.roomId AND G.roomId = R.idRoom AND UG.userId = U.idUser AND UG.giftId = G.idGifts AND U.username = ? AND R.idRoom = ?;";
 
             ps = cx.prepareStatement(sql);
             ps.setString(1, user.getUsername()); // (1,..) premier point d'interrogation
@@ -30,11 +30,6 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
             rs = ps.executeQuery();
 
             while (rs.next()) {
-                Room temp = user.getRoomById(rs.getInt(IRoomDao.ID_ROW));
-                if (temp == null) {
-                    temp = new Room(rs.getInt(IRoomDao.ID_ROW), rs.getString(IRoomDao.NAME_ROW), null);
-                    user.addRoom(temp);
-                }
                 Gift gift = new Gift(rs.getInt(ID_ROW));
                 gift.setPrice(rs.getDouble(PRICE_ROW));
                 gift.setName(rs.getString(NAME_ROW));
@@ -45,7 +40,7 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
                 userForGift.setUsername(rs.getString(IUserDao.USERNAME_ROW));
                 gift.getAmountByUser().put(userId, rs.getDouble(AMOUNT_ROW));
                 gift.getUserById().put(userId, userForGift);
-                temp.addGift(gift);
+                room.addGift(gift);
             }
 
         } catch (SQLException e) {

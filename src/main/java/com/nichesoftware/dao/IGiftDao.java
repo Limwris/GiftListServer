@@ -10,10 +10,11 @@ import com.nichesoftware.model.User;
  * Created by n_che on 02/05/2016.
  */
 public interface IGiftDao {
-    String ID_ROW = "id";
+    String ID_ROW = "idGifts";
     String NAME_ROW = "name";
     String PRICE_ROW = "price";
     String AMOUNT_ROW = "allocatedAmount";
+    String ROOM_ID_ROW = "roomId";
 
     void addGift(User user, Room room, final String giftName,
                  final double giftPrice, final double allocatedAmount) throws ServerException, GenericException;

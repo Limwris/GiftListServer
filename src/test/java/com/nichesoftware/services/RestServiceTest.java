@@ -45,12 +45,17 @@ public class RestServiceTest {
     @Test
     public void itShouldAddGift() throws Exception {
         // Arange
-        User user = new User();
+        final User user = new User();
         final Room room = new Room(1, "Prenom", "Nom");
-        List<Room> rooms = new ArrayList<>();
-        rooms.add(room);
+
         when(userDao.findByUsername(anyString())).thenReturn(user);
-        when(roomDao.getAllRooms(eq(user))).thenReturn(rooms);
+        Mockito.doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                user.addRoom(room);
+                return null;
+            }
+        }).when(roomDao).getAllRooms(eq(user));
         Mockito.doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -61,7 +66,6 @@ public class RestServiceTest {
                 return null;
             }
         }).when(giftDao).addGift(eq(user), any(Room.class), anyString(), anyDouble(), anyDouble());
-
 
         // Act
         sut.addGift("jean-pierre", 1, "Train", 129, 0);

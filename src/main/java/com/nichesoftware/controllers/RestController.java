@@ -44,14 +44,14 @@ public class RestController {
         return true;
     }
 
-    @RequestMapping(value = "gifts", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "gifts", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Gift> getGifts(@RequestHeader(value="X-Auth-Token") String token, @RequestBody RoomDto roomDto) throws Exception {
         User user = TokenUtils.getUserFromToken(token);
         return restService.getGifts(user.getUsername(), roomDto.getRoomId());
     }
 
     @RequestMapping(value = "rooms", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Room> getRooms(@RequestHeader(value="X-Auth-Token") String token, @RequestBody GiftDto giftDto) throws Exception {
+    public List<Room> getRooms(@RequestHeader(value="X-Auth-Token") String token) throws Exception {
         User user = TokenUtils.getUserFromToken(token);
         return restService.getRooms(user.getUsername());
     }
@@ -84,7 +84,7 @@ public class RestController {
         return true;
     }
 
-    @RequestMapping(value = "authentication", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "authentication", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
     public String authenticate(@RequestBody final UserDto userDto) throws Exception {
         User user = restService.authenticate(userDto.getUsername(), userDto.getPassword());
         return TokenUtils.generateToken(user);
@@ -96,7 +96,7 @@ public class RestController {
         return false;
     }
 
-    @RequestMapping(value = "register", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "register", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
     public String register(@RequestBody final UserDto userDto) throws Exception {
         User user = restService.createUser(userDto.getUsername(), userDto.getPassword());
         return TokenUtils.generateToken(user);
@@ -126,7 +126,9 @@ public class RestController {
         gift.setName("Playstation 8");
         gift.setPrice(455.99);
         gift.getAmountByUser().put(1, 60d);
+        gift.getUserById().put(1, user1);
         gift.getAmountByUser().put(2, 35d);
+        gift.getUserById().put(2, user2);
         gifts.add(gift);
         rooms.add(new Room(0, "John Doe", "Anniversaire", gifts));
         rooms.add(new Room(1, "Jane Doe", "Noël"));

@@ -88,9 +88,8 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
     }
 
     @Override
-    public Room getRoom(User user, int id) throws ServerException, GenericException {
+    public void getRoom(User user, int id) throws ServerException, GenericException {
 
-        Room room = null;
         Connection cx = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -104,6 +103,71 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
             ps = cx.prepareStatement(sql);
             ps.setString(1, user.getUsername()); // (1,..) premier point d'interrogation
             ps.setInt(2, id);
+            rs = ps.executeQuery();
+
+            // Need to move the cursor to the first row
+            if (rs.next()) {
+                Room room = new Room(rs.getInt(ID_ROW), rs.getString(NAME_ROW), rs.getString(OCCASION_ROW));
+                user.addRoom(room);
+            }
+
+        } catch (SQLException e) {
+            handleSqlException(e);
+        } catch (ClassNotFoundException e) {
+            throw new GenericException();
+        } catch (NamingException e) {
+            throw new GenericException();
+        } finally {
+            close(cx, ps, rs);
+        }
+    }
+
+    @Override
+    public void getAllRooms(User user) throws ServerException, GenericException {
+
+        Connection cx = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            cx = getConnection();
+            String sql = "SELECT room.idRoom, room.roomName, room.occasion FROM room JOIN user_room ON user_room.roomId = room.idRoom JOIN user ON user.idUser = user_room.userId WHERE user.username = ?";
+
+            ps = cx.prepareStatement(sql);
+            ps.setString(1, user.getUsername()); // (1,..) premier point d'interrogation
+            rs = ps.executeQuery();
+
+            while (rs.next()){
+                user.addRoom(new Room(rs.getInt(ID_ROW), rs.getString(NAME_ROW), rs.getString(OCCASION_ROW)));
+            }
+
+        } catch (SQLException e) {
+            handleSqlException(e);
+        } catch (ClassNotFoundException e) {
+            throw new GenericException();
+        } catch (NamingException e) {
+            throw new GenericException();
+        } finally {
+            close(cx, ps, rs);
+        }
+    }
+
+    @Override
+    public Room getRoom(int id) throws ServerException, GenericException {
+
+        Room room = null;
+        Connection cx = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            cx = getConnection();
+
+            // L'utilisateur doit être préalablement ajouté à la salle
+            String sql = "SELECT R.idRoom, R.roomName, R.occasion FROM room AS R WHERE R.idRoom = ?";
+
+            ps = cx.prepareStatement(sql);
+            ps.setInt(1, id);
             rs = ps.executeQuery();
 
             // Need to move the cursor to the first row
@@ -125,45 +189,10 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
     }
 
     @Override
-    public List<Room> getAllRooms(User user) throws ServerException, GenericException {
-
-        List<Room> rooms = new ArrayList<>();
-        Connection cx = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        try {
-            cx = getConnection();
-            String sql = "SELECT room.idRoom, room.roomName, room.occasion FROM room JOIN user_room ON user_room.roomId = room.idRoom JOIN user ON user.idUser = user_room.userId WHERE user.username = ?";
-
-            ps = cx.prepareStatement(sql);
-            ps.setString(1, user.getUsername()); // (1,..) premier point d'interrogation
-            rs = ps.executeQuery();
-
-            while (rs.next()){
-                rooms.add(new Room(rs.getInt(ID_ROW), rs.getString(NAME_ROW), rs.getString(OCCASION_ROW)));
-            }
-
-        } catch (SQLException e) {
-            handleSqlException(e);
-        } catch (ClassNotFoundException e) {
-            throw new GenericException();
-        } catch (NamingException e) {
-            throw new GenericException();
-        } finally {
-            close(cx, ps, rs);
-        }
-
-        return rooms;
+    public void updateRoom(Room room, User user) throws ServerException, GenericException {
     }
 
     @Override
-    public boolean updateRoom(Room room, User user) throws ServerException, GenericException {
-        return false;
-    }
-
-    @Override
-    public boolean deleteRoom(Room room, User user) throws ServerException, GenericException {
-        return false;
+    public void deleteRoom(Room room, User user) throws ServerException, GenericException {
     }
 }
