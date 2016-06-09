@@ -19,6 +19,7 @@ public interface IRestService {
             throws GenericException, ServerException;
     List<Gift> getGifts(final String username, int roomId) throws GenericException, ServerException;
     void deleteGift(final String username, int giftId) throws ServerException, GenericException;
+    void updateGift(final String username, int roomId, int giftId, double allocatedAmount) throws ServerException, GenericException;
 
     /******************************************************************************************************************/
     /********************                              Room                                        ********************/
@@ -27,6 +28,7 @@ public interface IRestService {
             throws ServerException, GenericException;
     void inviteUserToRoom(final String username, int roomId) throws ServerException, GenericException;
     List<Room> getRooms(final String username) throws ServerException, GenericException;
+    List<Room> getCompleteRooms(final String username) throws ServerException, GenericException;
     void deleteRoom(final String username, int roomId) throws ServerException, GenericException;
 
     /******************************************************************************************************************/

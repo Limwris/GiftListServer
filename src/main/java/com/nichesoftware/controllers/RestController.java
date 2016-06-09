@@ -37,14 +37,16 @@ public class RestController {
         this.restService = restService;
     }
 
-    @RequestMapping(value = "invite", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "invite", method = RequestMethod.POST,
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public boolean inviteUserToRoom(@RequestHeader(value="X-Auth-Token") String token, @RequestBody RoomDto roomDto) throws Exception {
         User user = TokenUtils.getUserFromToken(token);
         restService.inviteUserToRoom(user.getUsername(), roomDto.getRoomId());
         return true;
     }
 
-    @RequestMapping(value = "gifts", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "gifts", method = RequestMethod.POST,
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public List<Gift> getGifts(@RequestHeader(value="X-Auth-Token") String token, @RequestBody RoomDto roomDto) throws Exception {
         User user = TokenUtils.getUserFromToken(token);
         return restService.getGifts(user.getUsername(), roomDto.getRoomId());
@@ -53,31 +55,43 @@ public class RestController {
     @RequestMapping(value = "rooms", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Room> getRooms(@RequestHeader(value="X-Auth-Token") String token) throws Exception {
         User user = TokenUtils.getUserFromToken(token);
-        return restService.getRooms(user.getUsername());
+        return restService.getCompleteRooms(user.getUsername());
     }
 
-    @RequestMapping(value = "gift", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "gift", method = RequestMethod.POST,
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public boolean addGift(@RequestHeader(value="X-Auth-Token") String token, @RequestBody GiftDto giftDto) throws Exception {
         User user = TokenUtils.getUserFromToken(token);
         restService.addGift(user.getUsername(), giftDto.getRoomId(), giftDto.getName(), giftDto.getPrice(), giftDto.getAmount());
         return true;
     }
 
-    @RequestMapping(value = "room", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "gift", method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public boolean updateGift(@RequestHeader(value="X-Auth-Token") String token, @RequestBody GiftDto giftDto) throws Exception {
+        User user = TokenUtils.getUserFromToken(token);
+        restService.updateGift(user.getUsername(), giftDto.getRoomId(), giftDto.getId(), giftDto.getAmount());
+        return true;
+    }
+
+    @RequestMapping(value = "room", method = RequestMethod.POST,
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public boolean addRoom(@RequestHeader(value="X-Auth-Token") String token, @RequestBody RoomDto roomDto) throws Exception {
         User user = TokenUtils.getUserFromToken(token);
         restService.addRoom(user.getUsername(), roomDto.getRoomName(), roomDto.getOccasion());
         return true;
     }
 
-    @RequestMapping(value = "gift", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "gift", method = RequestMethod.DELETE,
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public boolean deleteGift(@RequestHeader(value="X-Auth-Token") String token, @RequestBody GiftDto giftDto) throws Exception {
         User user = TokenUtils.getUserFromToken(token);
         restService.deleteGift(user.getUsername(), giftDto.getRoomId());
         return true;
     }
 
-    @RequestMapping(value = "room", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "room", method = RequestMethod.DELETE,
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public boolean deleteRoom(@RequestHeader(value="X-Auth-Token") String token, @RequestBody RoomDto roomDto) throws Exception {
         User user = TokenUtils.getUserFromToken(token);
         restService.deleteRoom(user.getUsername(), roomDto.getRoomId());
@@ -96,7 +110,8 @@ public class RestController {
         return false;
     }
 
-    @RequestMapping(value = "register", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
+    @RequestMapping(value = "register", method = RequestMethod.POST,
+            produces = MediaType.TEXT_PLAIN_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public String register(@RequestBody final UserDto userDto) throws Exception {
         User user = restService.createUser(userDto.getUsername(), userDto.getPassword());
         return TokenUtils.generateToken(user);

@@ -65,6 +65,26 @@ public class RestService implements IRestService {
     }
 
     @Override
+    public void updateGift(String username, int roomId, int giftId, double allocatedAmount) throws ServerException, GenericException {
+        User user = userDao.findByUsername(username);
+        if(user == null) {
+            throw new AuthenticationException();
+        }
+
+        roomDao.getRoom(user, roomId);
+        Room room = user.getRoomById(roomId);
+        giftDao.getGifts(user, room);
+
+        Gift gift = room.getGiftById(giftId);
+        if (gift == null) {
+            throw new GenericException("Le cadeau n'existe pas dans la salle passée en paramètre");
+        }
+        // Modifier le montant alloué par l'utilisateur
+        gift.getAmountByUser().put(user.getId(), allocatedAmount);
+        giftDao.updateGift(user, gift);
+    }
+
+    @Override
     public User createUser(final String username, final String password) throws GenericException, ServerException {
         User user = new User();
         user.setUsername(username);
@@ -121,6 +141,23 @@ public class RestService implements IRestService {
         roomDao.getAllRooms(user);
 
         return user.getRooms();
+    }
+
+    @Override
+    public List<Room> getCompleteRooms(final String username) throws ServerException, GenericException {
+        User user = userDao.findByUsername(username);
+        if(user == null) {
+            throw new AuthenticationException();
+        }
+
+        // Ajoute toutes les salles à l'utilisateur
+        roomDao.getAllRooms(user);
+        for (Room room : user.getRooms()) {
+            giftDao.getGifts(user, room);
+        }
+
+        return user.getRooms();
+
     }
 
     @Override

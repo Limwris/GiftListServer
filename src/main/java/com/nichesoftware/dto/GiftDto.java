@@ -5,6 +5,10 @@ package com.nichesoftware.dto;
  */
 public class GiftDto {
     /**
+     * Identifiant unique du cadeau
+     */
+    private int id;
+    /**
      * Montant du cadeau
      */
     private double price;
@@ -20,6 +24,24 @@ public class GiftDto {
      * Identifiant unique de la salle à laquelle est rattaché le cadeau
      */
     private int roomId;
+
+
+    /**
+     * Getter sur l'identifiant unique du cadeau
+     * @return id
+     */
+    public int getId() {
+        return id;
+    }
+
+
+    /**
+     * Setter sur l'identifiant unique du cadeau
+     * @param id
+     */
+    public void setId(int id) {
+        this.id = id;
+    }
 
     /**
      * Getter sur le montant du cadeau

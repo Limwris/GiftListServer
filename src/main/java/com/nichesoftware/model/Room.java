@@ -157,4 +157,18 @@ public class Room {
         }
         giftList.add(gift);
     }
+
+    /**
+     * Recherche un cadeau dans la liste des cadeaux de la salle
+     * @param giftId - identifiant du cadeau recherchée
+     * @return room  - cadeau correspondant à l'identifiant passé en paramètre, nul sinon
+     */
+    public Gift getGiftById(final int giftId) {
+        for (Gift gift : giftList) {
+            if (gift.getId() == giftId) {
+                return gift;
+            }
+        }
+        return null;
+    }
 }
