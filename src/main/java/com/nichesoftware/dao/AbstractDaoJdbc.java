@@ -4,9 +4,6 @@ import com.nichesoftware.exceptions.GenericException;
 import com.nichesoftware.exceptions.KeyAlreadyExistsException;
 import com.nichesoftware.exceptions.ServerException;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 import java.sql.*;
 
 /**
@@ -20,32 +17,6 @@ public class AbstractDaoJdbc {
         try { if(cx != null) cx.close(); } catch (SQLException e) { e.printStackTrace(); }
     }
 
-    protected Connection getConnection() throws ClassNotFoundException, SQLException, NamingException {
-        // Sur Tomcat:
-        //return getConnectionDS();
-        // Avec une classe de test:
-        return getConnectionDM();
-    }
-
-    protected Connection getConnectionDM() throws ClassNotFoundException, SQLException {
-        Connection cx;
-        Class.forName("com.mysql.jdbc.Driver");
-        String url = "jdbc:mysql://localhost:3306/giftlistserver";
-
-        cx = DriverManager.getConnection(url, "scott", "summers");
-        return cx;
-    }
-
-    protected Connection getConnectionDS() throws ClassNotFoundException, SQLException, NamingException {
-        // Lookup data source
-        InitialContext context = new InitialContext();
-        DataSource ds = (DataSource)context.lookup("java:comp/env/jdbc/giftlist");
-        // Obtention de la connexion
-        Connection cx = ds.getConnection();
-
-        return cx;
-    }
-
     /**
      * Gestion des erreurs SQL
      * @param e
@@ -53,7 +24,8 @@ public class AbstractDaoJdbc {
      * @throws ServerException
      */
     protected void handleSqlException(SQLException e) throws GenericException, ServerException {
-        if (e.getErrorCode() == 1062) {
+        // SQLSTATE 23505: Unique violation because of duplicated key (errorCode -104 HSQLDB, 23505 h2)
+        if (e.getErrorCode() == 1062 || e.getErrorCode() == -104 || e.getErrorCode() == 23505) {
             throw new KeyAlreadyExistsException();
         } else if (e.getErrorCode() == 1044) {
             // Mauvais nom de base

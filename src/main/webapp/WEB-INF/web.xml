@@ -7,8 +7,9 @@
 
     <display-name>Serveur REST GiftList</display-name>
 
-    <!-- Tomcat -->
+    <!-- JNDI -->
     <!--<resource-ref>-->
+        <!--<description>DataSource Reference</description>-->
         <!--<res-ref-name>jdbc/giftlist</res-ref-name>-->
         <!--<res-type>javax.sql.DataSource</res-type>-->
         <!--<res-auth>Container</res-auth>-->
@@ -22,7 +23,7 @@
         </servlet-class>
         <init-param>
             <param-name>contextConfigLocation</param-name>
-            <param-value>/WEB-INF/spring/rest-servlet.xml</param-value>
+            <param-value>classpath:applicationContext.xml</param-value>
         </init-param>
     </servlet>
 

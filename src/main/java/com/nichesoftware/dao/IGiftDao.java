@@ -13,6 +13,7 @@ public interface IGiftDao {
     String ID_ROW = "idGifts";
     String NAME_ROW = "name";
     String PRICE_ROW = "price";
+    String URL_ROW = "url";
     String AMOUNT_ROW = "allocatedAmount";
     String ROOM_ID_ROW = "roomId";
 

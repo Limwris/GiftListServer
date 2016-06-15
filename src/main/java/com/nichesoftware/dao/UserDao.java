@@ -3,8 +3,9 @@ package com.nichesoftware.dao;
 import com.nichesoftware.exceptions.GenericException;
 import com.nichesoftware.exceptions.ServerException;
 import com.nichesoftware.model.User;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.naming.NamingException;
+import javax.sql.DataSource;
 import java.sql.*;
 
 /**
@@ -13,6 +14,12 @@ import java.sql.*;
  *
  */
 public class UserDao extends AbstractDaoJdbc implements IUserDao {
+    /**
+     * Data source
+     */
+    @Autowired
+    private DataSource dataSource;
+
     @Override
     public User findByUsername(String username) throws ServerException, GenericException {
 
@@ -22,7 +29,7 @@ public class UserDao extends AbstractDaoJdbc implements IUserDao {
         ResultSet rs = null;
 
         try {
-            cx = getConnection();
+            cx = dataSource.getConnection();
 
             String sql = "SELECT idUser, username, password, creationDate FROM user WHERE username = ?";
 
@@ -41,10 +48,6 @@ public class UserDao extends AbstractDaoJdbc implements IUserDao {
 
         } catch (SQLException e) {
             handleSqlException(e);
-        } catch (ClassNotFoundException e) {
-            throw new GenericException();
-        } catch (NamingException e) {
-            throw new GenericException();
         } finally {
             close(cx, ps, rs);
         }
@@ -59,7 +62,7 @@ public class UserDao extends AbstractDaoJdbc implements IUserDao {
         PreparedStatement ps = null;
 
         try {
-            cx = getConnection();
+            cx = dataSource.getConnection();
 
             String sql = "INSERT INTO user(username, password, creationDate) VALUES (?, ?, ?);";
             ps = cx.prepareStatement(sql);
@@ -74,12 +77,24 @@ public class UserDao extends AbstractDaoJdbc implements IUserDao {
 
         } catch (SQLException e) {
             handleSqlException(e);
-        } catch (NamingException e) {
-            throw new GenericException();
-        } catch (ClassNotFoundException e) {
-            throw new GenericException();
         } finally {
             close(cx, ps, null);
         }
+    }
+
+    /**
+     * Getter on the data source
+     * @return dataSource
+     */
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
+    /**
+     * Setter on the data source
+     * @param dataSource
+     */
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 }

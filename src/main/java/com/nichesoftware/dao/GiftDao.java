@@ -5,14 +5,20 @@ import com.nichesoftware.exceptions.ServerException;
 import com.nichesoftware.model.Gift;
 import com.nichesoftware.model.Room;
 import com.nichesoftware.model.User;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.naming.NamingException;
+import javax.sql.DataSource;
 import java.sql.*;
 
 /**
  * Created by n_che on 02/05/2016.
  */
 public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
+    /**
+     * Data source
+     */
+    @Autowired
+    private DataSource dataSource;
 
     @Override
     public void getGifts(User user, Room room) throws ServerException, GenericException {
@@ -21,18 +27,22 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
         ResultSet rs = null;
 
         try {
-            cx = getConnection();
-            String sql = "SELECT U.username, U.idUser, UG.allocatedAmount, G.* FROM giftlistserver.user AS U, giftlistserver.room AS R, giftlistserver.user_room AS UR, giftlistserver.gifts AS G, giftlistserver.user_gift AS UG WHERE U.idUser = UR.userId AND R.idRoom = UR.roomId AND G.roomId = R.idRoom AND UG.userId = U.idUser AND UG.giftId = G.idGifts AND U.username = ? AND R.idRoom = ?;";
+            cx = dataSource.getConnection();
+            String sql = "SELECT U.username, U.idUser, UG.allocatedAmount, G.* FROM user AS U, room AS R, user_room AS UR, gifts AS G, user_gift AS UG WHERE U.idUser = UR.userId AND R.idRoom = UR.roomId AND G.roomId = R.idRoom AND UG.userId = U.idUser AND UG.giftId = G.idGifts AND R.idRoom = ?;";
 
             ps = cx.prepareStatement(sql);
-            ps.setString(1, user.getUsername()); // (1,..) premier point d'interrogation
-            ps.setInt(2, room.getId());
+            ps.setInt(1, room.getId());
             rs = ps.executeQuery();
 
             while (rs.next()) {
-                Gift gift = new Gift(rs.getInt(ID_ROW));
-                gift.setPrice(rs.getDouble(PRICE_ROW));
-                gift.setName(rs.getString(NAME_ROW));
+                int giftId = rs.getInt(ID_ROW);
+                Gift gift = room.getGiftById(giftId);
+                if (gift == null) {
+                    gift = new Gift(giftId);
+                    gift.setPrice(rs.getDouble(PRICE_ROW));
+                    gift.setName(rs.getString(NAME_ROW));
+                    room.addGift(gift);
+                }
 
                 User userForGift = new User();
                 int userId = rs.getInt(IUserDao.ID_ROW);
@@ -40,15 +50,10 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
                 userForGift.setUsername(rs.getString(IUserDao.USERNAME_ROW));
                 gift.getAmountByUser().put(userId, rs.getDouble(AMOUNT_ROW));
                 gift.getUserById().put(userId, userForGift);
-                room.addGift(gift);
             }
 
         } catch (SQLException e) {
             handleSqlException(e);
-        } catch (ClassNotFoundException e) {
-            throw new GenericException();
-        } catch (NamingException e) {
-            throw new GenericException();
         } finally {
             close(cx, ps, rs);
         }
@@ -62,7 +67,7 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
         Gift gift = null;
 
         try {
-            cx = getConnection();
+            cx = dataSource.getConnection();
             String sql = "SELECT G.*, UG.allocatedAmount, U.username, U.idUser FROM rooms AS R, gifts AS G, user_gifts, user AS U as UG WHERE G.roomId = R.idRoom AND R.idGifts = ? AND UG.roomId = R.idRoom AND UG.userId = ? AND UG.userId = U.idUser;";
             ps = cx.prepareStatement(sql);
             ps.setInt(1, giftId);
@@ -74,7 +79,7 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
                     if (gift == null) {
                         gift = new Gift(giftId);
                         gift.setName(rs.getString(NAME_ROW));
-                        gift.setPrice(rs.getFloat(PRICE_ROW));
+                        gift.setPrice(rs.getDouble(PRICE_ROW));
                     }
                     User userForGift = new User();
                     int userId = rs.getInt(IUserDao.ID_ROW);
@@ -89,10 +94,6 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
 
         } catch (SQLException e) {
             handleSqlException(e);
-        } catch (NamingException e) {
-            throw new GenericException();
-        } catch (ClassNotFoundException e) {
-            throw new GenericException();
         } finally {
             close(cx, ps, rs);
         }
@@ -112,9 +113,9 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
         PreparedStatement ps = null;
 
         try {
-            cx = getConnection();
+            cx = dataSource.getConnection();
 
-            String sql = "INSERT INTO giftlistserver.gifts(name, price, roomId) VALUES (?, ?, ?);";
+            String sql = "INSERT INTO gifts(name, price, roomId) VALUES (?, ?, ?);";
             ps = cx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, giftName);
             ps.setDouble(2, giftPrice);
@@ -126,7 +127,7 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
             if (rs.next()) {
                 int giftId = rs.getInt(1);
 
-                String sql_foreign_key = "INSERT INTO giftlistserver.user_gift(userId, giftId, allocatedAmount) VALUES (?, ?, ?);";
+                String sql_foreign_key = "INSERT INTO user_gift(userId, giftId, allocatedAmount) VALUES (?, ?, ?);";
                 ps = cx.prepareStatement(sql_foreign_key);
                 ps.setInt(1, user.getId());
                 ps.setInt(2, giftId);
@@ -138,10 +139,6 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
 
         } catch (SQLException e) {
             handleSqlException(e);
-        } catch (NamingException e) {
-            throw new GenericException();
-        } catch (ClassNotFoundException e) {
-            throw new GenericException();
         } finally {
             close(cx, ps, null);
         }
@@ -153,8 +150,8 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
         PreparedStatement ps = null;
 
         try {
-            cx = getConnection();
-            String sql= "INSERT INTO giftlistserver.user_gift(userId, giftId, allocatedAmount) VALUES (?, ?, ?);";
+            cx = dataSource.getConnection();
+            String sql= "INSERT INTO user_gift(userId, giftId, allocatedAmount) VALUES (?, ?, ?);";
             ps = cx.prepareStatement(sql);
             ps.setInt(1, user.getId());
             ps.setInt(2, gift.getId());
@@ -168,12 +165,24 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
 
         } catch (SQLException e) {
             handleSqlException(e);
-        } catch (NamingException e) {
-            throw new GenericException();
-        } catch (ClassNotFoundException e) {
-            throw new GenericException();
         } finally {
             close(cx, ps, null);
         }
+    }
+
+    /**
+     * Getter on the data source
+     * @return dataSource
+     */
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
+    /**
+     * Setter on the data source
+     * @param dataSource
+     */
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 }

@@ -1,24 +1,27 @@
 package com.nichesoftware.dao;
 
+import com.github.springtestdbunit.DbUnitTestExecutionListener;
+import com.github.springtestdbunit.annotation.DatabaseSetup;
+import com.github.springtestdbunit.annotation.DatabaseTearDown;
+import com.github.springtestdbunit.annotation.DbUnitConfiguration;
+import com.github.springtestdbunit.annotation.ExpectedDatabase;
+import com.github.springtestdbunit.assertion.DatabaseAssertionMode;
+import com.github.springtestdbunit.dataset.FlatXmlDataSetLoader;
 import com.nichesoftware.exceptions.KeyAlreadyExistsException;
 import com.nichesoftware.model.User;
-import org.dbunit.Assertion;
-import org.dbunit.database.DatabaseConnection;
-import org.dbunit.database.IDatabaseConnection;
-import org.dbunit.dataset.IDataSet;
-import org.dbunit.dataset.ITable;
-import org.dbunit.dataset.filter.DefaultColumnFilter;
-import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
-import org.dbunit.operation.DatabaseOperation;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
+import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.text.SimpleDateFormat;
 
 import static org.junit.Assert.assertEquals;
@@ -28,36 +31,24 @@ import static org.junit.Assert.assertNull;
 /**
  * Created by n_che on 29/04/2016.
  */
-@RunWith(JUnit4.class)
+@EnableWebMvc //mvc:annotation-driven
+@WebAppConfiguration
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = "UserDaoTest-context.xml")
+@DbUnitConfiguration(dataSetLoader = FlatXmlDataSetLoader.class,
+        databaseConnection = "ds")
+@TestExecutionListeners({ DependencyInjectionTestExecutionListener.class, // standard Spring listeners
+        DirtiesContextTestExecutionListener.class, // standard Spring listeners
+        TransactionalTestExecutionListener.class, // standard Spring listeners
+        DbUnitTestExecutionListener.class }) // process DBUnit annotations
+@DatabaseSetup(connection = "ds", value = "classpath:data.xml")
 public class UserDaoTest {
+    @Autowired
+    @Qualifier(value = "userDao")
     private UserDao sut;
 
-    private IDatabaseConnection getConnection() throws Exception {
-        Class.forName("com.mysql.jdbc.Driver");
-        String url = "jdbc:mysql://localhost:3306/giftlistserver";
-        Connection cn = DriverManager.getConnection(url, "scott", "summers");
-        IDatabaseConnection cx = new DatabaseConnection(cn);
-
-        return cx;
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        sut = new UserDao();
-
-        IDatabaseConnection dbConnection = getConnection();
-        FlatXmlDataSetBuilder builder = new FlatXmlDataSetBuilder();
-        ClassLoader classLoader = getClass().getClassLoader();
-        IDataSet data = builder.build(new File(classLoader.getResource("data.xml").getFile()));
-//        IDataSet fullDataSet = new FilteredDataSet(new DatabaseSequenceFilter(dbConnection), data);
-
-        DatabaseOperation.CLEAN_INSERT.execute(dbConnection, data);
-//        DatabaseOperation.CLEAN_INSERT.execute(dbConnection, fullDataSet);
-        dbConnection.close();
-    }
-
-
     @Test
+    @DatabaseTearDown
     public void itShouldReturnCorrectPassword() throws Exception {
         // Act
         User user = sut.findByUsername("rr");
@@ -68,6 +59,7 @@ public class UserDaoTest {
     }
 
     @Test
+    @DatabaseTearDown
     public void itShouldReturnNullWhenUsernameIsUnknown() throws Exception {
         // Act
         User user = sut.findByUsername("inconnu");
@@ -77,7 +69,8 @@ public class UserDaoTest {
     }
 
     @Test(expected = KeyAlreadyExistsException.class)
-    public void itShouldReturnThrowUserAlreadyExistsExceptionWhenUsernameIsAlreadyInBase() throws Exception {
+    @DatabaseTearDown
+    public void itShouldThrowUserAlreadyExistsExceptionWhenUsernameIsAlreadyInBase() throws Exception {
         // Arrange
         User user = new User();
         user.setUsername("ap");
@@ -91,6 +84,8 @@ public class UserDaoTest {
 
 
     @Test
+    @DatabaseTearDown
+    @ExpectedDatabase(connection="ds", assertionMode = DatabaseAssertionMode.NON_STRICT, value = "classpath:expected_user.xml")
     public void itShouldCreateUserFrancoisPignon() throws Exception {
         // Arrange
         User u = new User();
@@ -102,29 +97,5 @@ public class UserDaoTest {
 
         // Act
         sut.createUser(u);
-
-        // Lecture données actuelles
-        IDataSet databaseDataSet = getConnection().createDataSet();
-        ITable actualTable = databaseDataSet.getTable("user");
-
-        // Lecture des données attendues
-        ClassLoader classLoader = getClass().getClassLoader();
-        File expected = new File(classLoader.getResource("expected_user.xml").getFile());
-        IDataSet expectedDataSet = new FlatXmlDataSetBuilder().build(expected);
-//        IDataSet fullDataSet = new FilteredDataSet(new DatabaseSequenceFilter(getConnection()), expectedDataSet);
-        ITable expectedTable = expectedDataSet.getTable("user");
-//        ITable expectedTable = fullDataSet.getTable("user_data");
-
-        // Vérification données attendues / données actuelles
-        // en comparant uniquement les colonnes listées dans
-        // le fichier des données attendues
-//        ITable filteredTable = DefaultColumnFilter.includedColumnsTable(actualTable, expectedTable.getTableMetaData().getColumns());
-        ITable filteredTable = DefaultColumnFilter.excludedColumnsTable(actualTable, new String[] {"idUser"});
-        Assertion.assertEquals(expectedTable, filteredTable);
-    }
-
-    @After
-    public void tearDown() {
-        sut = null;
     }
 }

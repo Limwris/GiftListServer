@@ -5,23 +5,28 @@ import com.nichesoftware.exceptions.ServerException;
 import com.nichesoftware.model.Room;
 import com.nichesoftware.model.User;
 import com.nichesoftware.utils.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.naming.NamingException;
+import javax.sql.DataSource;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Kattleya on 22/05/2016.
  */
 public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
+    /**
+     * Data source
+     */
+    @Autowired
+    private DataSource dataSource;
+
     @Override
     public void inviteUserToRoom(User user, Room room) throws ServerException, GenericException {
         Connection cx = null;
         PreparedStatement ps = null;
 
         try {
-            cx = getConnection();
+            cx = dataSource.getConnection();
 
             final String sql = "INSERT INTO user_room(roomId, userId) VALUES (?, ?);";
             ps = cx.prepareStatement(sql);
@@ -36,10 +41,6 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
 
         } catch (SQLException e) {
             handleSqlException(e);
-        } catch (NamingException e) {
-            throw new GenericException();
-        } catch (ClassNotFoundException e) {
-            throw new GenericException();
         } finally {
             close(cx, ps, null);
         }
@@ -52,7 +53,7 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
         PreparedStatement ps = null;
 
         try {
-            cx = getConnection();
+            cx = dataSource.getConnection();
 
             String sql = "INSERT INTO room(roomName, occasion) VALUES (?, ?);";
             ps = cx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -78,10 +79,6 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
 
         } catch (SQLException e) {
             handleSqlException(e);
-        } catch (NamingException e) {
-            throw new GenericException();
-        } catch (ClassNotFoundException e) {
-            throw new GenericException();
         } finally {
             close(cx, ps, null);
         }
@@ -95,7 +92,7 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
         ResultSet rs = null;
 
         try {
-            cx = getConnection();
+            cx = dataSource.getConnection();
 
             // L'utilisateur doit être préalablement ajouté à la salle
             String sql = "SELECT R.idRoom, R.roomName, R.occasion FROM room AS R JOIN user_room AS UR ON UR.roomId = R.idRoom JOIN user AS U ON U.idUser = UR.userId WHERE U.username = ? AND R.idRoom = ?";
@@ -113,9 +110,6 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
 
         } catch (SQLException e) {
             handleSqlException(e);
-        } catch (ClassNotFoundException e) {
-            throw new GenericException();
-        } catch (NamingException e) {
             throw new GenericException();
         } finally {
             close(cx, ps, rs);
@@ -130,7 +124,7 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
         ResultSet rs = null;
 
         try {
-            cx = getConnection();
+            cx = dataSource.getConnection();
             String sql = "SELECT room.idRoom, room.roomName, room.occasion FROM room JOIN user_room ON user_room.roomId = room.idRoom JOIN user ON user.idUser = user_room.userId WHERE user.username = ?";
 
             ps = cx.prepareStatement(sql);
@@ -143,10 +137,6 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
 
         } catch (SQLException e) {
             handleSqlException(e);
-        } catch (ClassNotFoundException e) {
-            throw new GenericException();
-        } catch (NamingException e) {
-            throw new GenericException();
         } finally {
             close(cx, ps, rs);
         }
@@ -161,7 +151,7 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
         ResultSet rs = null;
 
         try {
-            cx = getConnection();
+            cx = dataSource.getConnection();
 
             // L'utilisateur doit être préalablement ajouté à la salle
             String sql = "SELECT R.idRoom, R.roomName, R.occasion FROM room AS R WHERE R.idRoom = ?";
@@ -177,10 +167,6 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
 
         } catch (SQLException e) {
             handleSqlException(e);
-        } catch (ClassNotFoundException e) {
-            throw new GenericException();
-        } catch (NamingException e) {
-            throw new GenericException();
         } finally {
             close(cx, ps, rs);
         }
@@ -194,5 +180,21 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
 
     @Override
     public void deleteRoom(Room room, User user) throws ServerException, GenericException {
+    }
+
+    /**
+     * Getter on the data source
+     * @return dataSource
+     */
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
+    /**
+     * Setter on the data source
+     * @param dataSource
+     */
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 }
