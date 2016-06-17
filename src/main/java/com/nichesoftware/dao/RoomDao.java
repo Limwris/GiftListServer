@@ -47,10 +47,12 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
     }
 
     @Override
-    public void saveRoom(User user, final String roomName,
+    public Room saveRoom(User user, final String roomName,
                          final String occasion) throws ServerException, GenericException {
         Connection cx = null;
         PreparedStatement ps = null;
+        ResultSet rs = null;
+        Room room = null;
 
         try {
             cx = dataSource.getConnection();
@@ -64,9 +66,10 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
 
             ps.executeUpdate();
 
-            ResultSet rs = ps.getGeneratedKeys();
+            rs = ps.getGeneratedKeys();
             if (rs.next()) {
                 int roomId = rs.getInt(1);
+                room = new Room(roomId, roomName, occasion);
 
                 String sql_foreign_key = "INSERT INTO user_room(roomId, userId) VALUES (?, ?);";
                 ps = cx.prepareStatement(sql_foreign_key);
@@ -80,8 +83,10 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
         } catch (SQLException e) {
             handleSqlException(e);
         } finally {
-            close(cx, ps, null);
+            close(cx, ps, rs);
         }
+
+        return room;
     }
 
     @Override
@@ -175,7 +180,8 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
     }
 
     @Override
-    public void updateRoom(Room room, User user) throws ServerException, GenericException {
+    public Room updateRoom(Room room, User user) throws ServerException, GenericException {
+        return null;
     }
 
     @Override

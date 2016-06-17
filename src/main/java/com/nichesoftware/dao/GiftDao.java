@@ -107,10 +107,12 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
     }
 
     @Override
-    public void addGift(User user, Room room, final String giftName,
+    public Gift addGift(User user, Room room, final String giftName,
                         final double giftPrice, final double allocatedAmount) throws ServerException, GenericException {
         Connection cx = null;
         PreparedStatement ps = null;
+        ResultSet rs = null;
+        Gift gift = null;
 
         try {
             cx = dataSource.getConnection();
@@ -123,9 +125,14 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
 
             ps.executeUpdate();
 
-            ResultSet rs = ps.getGeneratedKeys();
+            rs = ps.getGeneratedKeys();
             if (rs.next()) {
                 int giftId = rs.getInt(1);
+                gift = new Gift(giftId);
+                gift.setName(giftName);
+                gift.setPrice(giftPrice);
+                gift.getAmountByUser().put(user.getId(), allocatedAmount);
+                gift.getUserById().put(user.getId(), user);
 
                 String sql_foreign_key = "INSERT INTO user_gift(userId, giftId, allocatedAmount) VALUES (?, ?, ?);";
                 ps = cx.prepareStatement(sql_foreign_key);
@@ -140,12 +147,14 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
         } catch (SQLException e) {
             handleSqlException(e);
         } finally {
-            close(cx, ps, null);
+            close(cx, ps, rs);
         }
+
+        return gift;
     }
 
     @Override
-    public void updateGift(User user, Gift gift) throws ServerException, GenericException {
+    public Gift updateGift(User user, Gift gift) throws ServerException, GenericException {
         Connection cx = null;
         PreparedStatement ps = null;
 
@@ -168,6 +177,8 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
         } finally {
             close(cx, ps, null);
         }
+
+        return gift;
     }
 
     /**

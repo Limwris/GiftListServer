@@ -17,9 +17,9 @@ public interface IGiftDao {
     String AMOUNT_ROW = "allocatedAmount";
     String ROOM_ID_ROW = "roomId";
 
-    void addGift(User user, Room room, final String giftName,
+    Gift addGift(User user, Room room, final String giftName,
                  final double giftPrice, final double allocatedAmount) throws ServerException, GenericException;
-    void updateGift(User user, Gift gift) throws ServerException, GenericException;
+    Gift updateGift(User user, Gift gift) throws ServerException, GenericException;
     void getGifts(User user, Room room) throws ServerException, GenericException;
     Gift getGift(User user, final int giftId) throws ServerException, GenericException ;
     void deleteGift(User user, final int giftId) throws ServerException, GenericException ;

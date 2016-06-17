@@ -90,7 +90,6 @@ public class User {
         this.password = password;
     }
 
-
     /**
      * Getter sur la liste des salles
      * @return rooms

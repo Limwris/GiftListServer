@@ -15,16 +15,16 @@ public interface IRestService {
     /******************************************************************************************************************/
     /********************                              Gift                                        ********************/
     /******************************************************************************************************************/
-    void addGift(final String username, int roomId, final String giftName, double giftPrice, double allocatedAmount)
+    Gift addGift(final String username, int roomId, final String giftName, double giftPrice, double allocatedAmount)
             throws GenericException, ServerException;
     List<Gift> getGifts(final String username, int roomId) throws GenericException, ServerException;
     void deleteGift(final String username, int giftId) throws ServerException, GenericException;
-    void updateGift(final String username, int roomId, int giftId, double allocatedAmount) throws ServerException, GenericException;
+    Gift updateGift(final String username, int roomId, int giftId, double allocatedAmount) throws ServerException, GenericException;
 
     /******************************************************************************************************************/
     /********************                              Room                                        ********************/
     /******************************************************************************************************************/
-    void addRoom(final String username, final String roomName, final String occasion)
+    Room addRoom(final String username, final String roomName, final String occasion)
             throws ServerException, GenericException;
     void inviteUserToRoom(final String username, int roomId) throws ServerException, GenericException;
     List<Room> getRooms(final String username) throws ServerException, GenericException;

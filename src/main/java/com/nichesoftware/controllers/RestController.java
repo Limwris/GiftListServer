@@ -66,29 +66,26 @@ public class RestController {
 
     @RequestMapping(value = "gift", method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public boolean addGift(@RequestHeader(value="X-Auth-Token") String token, @RequestBody GiftDto giftDto) throws Exception {
+    public Gift addGift(@RequestHeader(value="X-Auth-Token") String token, @RequestBody GiftDto giftDto) throws Exception {
         logger.info("[Entering] addGift");
         User user = TokenUtils.getUserFromToken(token);
-        restService.addGift(user.getUsername(), giftDto.getRoomId(), giftDto.getName(), giftDto.getPrice(), giftDto.getAmount());
-        return true;
+        return restService.addGift(user.getUsername(), giftDto.getRoomId(), giftDto.getName(), giftDto.getPrice(), giftDto.getAmount());
     }
 
     @RequestMapping(value = "gift", method = RequestMethod.PUT,
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public boolean updateGift(@RequestHeader(value="X-Auth-Token") String token, @RequestBody GiftDto giftDto) throws Exception {
+    public Gift updateGift(@RequestHeader(value="X-Auth-Token") String token, @RequestBody GiftDto giftDto) throws Exception {
         logger.info("[Entering] updateGift");
         User user = TokenUtils.getUserFromToken(token);
-        restService.updateGift(user.getUsername(), giftDto.getRoomId(), giftDto.getId(), giftDto.getAmount());
-        return true;
+        return restService.updateGift(user.getUsername(), giftDto.getRoomId(), giftDto.getId(), giftDto.getAmount());
     }
 
     @RequestMapping(value = "room", method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public boolean addRoom(@RequestHeader(value="X-Auth-Token") String token, @RequestBody RoomDto roomDto) throws Exception {
+    public Room addRoom(@RequestHeader(value="X-Auth-Token") String token, @RequestBody RoomDto roomDto) throws Exception {
         logger.info("[Entering] addRoom");
         User user = TokenUtils.getUserFromToken(token);
-        restService.addRoom(user.getUsername(), roomDto.getRoomName(), roomDto.getOccasion());
-        return true;
+        return restService.addRoom(user.getUsername(), roomDto.getRoomName(), roomDto.getOccasion());
     }
 
     @RequestMapping(value = "gift", method = RequestMethod.DELETE,

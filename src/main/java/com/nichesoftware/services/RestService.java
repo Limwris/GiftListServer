@@ -23,7 +23,7 @@ public class RestService implements IRestService {
     private IUserDao userDao;
 
     @Override
-    public void addGift(final String username, int roomId, final String giftName,
+    public Gift addGift(final String username, int roomId, final String giftName,
                         double giftPrice, double allocatedAmount) throws GenericException, ServerException {
         User user = userDao.findByUsername(username);
         if(user == null) {
@@ -38,7 +38,7 @@ public class RestService implements IRestService {
             throw new GenericException("La salle n'est pas présente dans la liste de l'utilisateur.");
         }
 
-        giftDao.addGift(user, room, giftName, giftPrice, allocatedAmount);
+        return giftDao.addGift(user, room, giftName, giftPrice, allocatedAmount);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class RestService implements IRestService {
     }
 
     @Override
-    public void updateGift(String username, int roomId, int giftId, double allocatedAmount) throws ServerException, GenericException {
+    public Gift updateGift(String username, int roomId, int giftId, double allocatedAmount) throws ServerException, GenericException {
         User user = userDao.findByUsername(username);
         if(user == null) {
             throw new AuthenticationException();
@@ -81,7 +81,7 @@ public class RestService implements IRestService {
         }
         // Modifier le montant alloué par l'utilisateur
         gift.getAmountByUser().put(user.getId(), allocatedAmount);
-        giftDao.updateGift(user, gift);
+        return giftDao.updateGift(user, gift);
     }
 
     @Override
@@ -178,13 +178,13 @@ public class RestService implements IRestService {
     }
 
     @Override
-    public void addRoom(final String username, final String roomName,
+    public Room addRoom(final String username, final String roomName,
                         final String occasion) throws ServerException, GenericException {
         User user = userDao.findByUsername(username);
         if(user == null) {
             throw new AuthenticationException();
         }
-        roomDao.saveRoom(user, roomName, occasion);
+        return roomDao.saveRoom(user, roomName, occasion);
     }
 
     public IGiftDao getGiftDao() {

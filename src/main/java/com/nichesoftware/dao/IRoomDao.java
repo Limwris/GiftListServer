@@ -18,13 +18,13 @@ public interface IRoomDao {
     //     CRUD     //
     //////////////////
     // Create
-    void saveRoom(User user, final String roomName, final String occasion) throws ServerException, GenericException;
+    Room saveRoom(User user, final String roomName, final String occasion) throws ServerException, GenericException;
     // Retreive
     void getRoom(User user, final int id) throws ServerException, GenericException;
     Room getRoom(int id) throws ServerException, GenericException;
     void getAllRooms(User user) throws ServerException, GenericException;
     // Update
-    void updateRoom(Room room, User user) throws ServerException, GenericException;
+    Room updateRoom(Room room, User user) throws ServerException, GenericException;
     // Delete
     void deleteRoom(Room room, User user) throws ServerException, GenericException;
 }
