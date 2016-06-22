@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by n_che on 28/04/2016.
@@ -53,6 +55,39 @@ public class UserDao extends AbstractDaoJdbc implements IUserDao {
         }
 
         return user;
+    }
+
+    @Override
+    public List<User> retreiveAllUsers() throws GenericException, ServerException {
+        Connection cx = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        List<User> users = new ArrayList<>();
+
+        try {
+            cx = dataSource.getConnection();
+
+            String sql = "SELECT idUser, username, phoneNumber FROM user";
+
+            ps = cx.prepareStatement(sql);
+            rs = ps.executeQuery();
+
+            // Need to move the cursor to the first row
+            if (rs.next()) {
+                User user = new User();
+                user.setId(rs.getInt(ID_ROW));
+                user.setUsername(rs.getString(USERNAME_ROW));
+                user.setPhoneNumber(rs.getString(PHONE_NUMBER_ROW));
+                users.add(user);
+            }
+
+        } catch (SQLException e) {
+            handleSqlException(e);
+        } finally {
+            close(cx, ps, rs);
+        }
+
+        return users;
     }
 
     @Override

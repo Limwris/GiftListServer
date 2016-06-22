@@ -121,6 +121,19 @@ public class RestService implements IRestService {
     }
 
     @Override
+    public List<User> retreiveAvailableUsers(List<String> phoneNumber) throws GenericException, ServerException {
+        List<User> users = userDao.retreiveAllUsers();
+
+        for (User user : users) {
+            if (phoneNumber.contains(user.getPhoneNumber())) {
+                users.remove(user);
+            }
+        }
+
+        return users;
+    }
+
+    @Override
     public void inviteUserToRoom(final String username, int roomId) throws ServerException, GenericException {
         User user = userDao.findByUsername(username);
         if(user == null) {

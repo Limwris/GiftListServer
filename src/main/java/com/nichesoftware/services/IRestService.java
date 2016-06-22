@@ -36,4 +36,5 @@ public interface IRestService {
     /******************************************************************************************************************/
     User createUser(final String username, final String password) throws GenericException, ServerException;
     User authenticate(final String username, final String password) throws GenericException, ServerException;
+    List<User> retreiveAvailableUsers(final List<String> phoneNumber) throws GenericException, ServerException;
 }

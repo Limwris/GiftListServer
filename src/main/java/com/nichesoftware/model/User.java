@@ -34,6 +34,10 @@ public class User {
      * Utile pour générer le token
      */
     private Date creationDate;
+    /**
+     * Numéro de téléphone de l'utilisateur
+     */
+    private String phoneNumber;
 
     /**
      * Consctructeur par défaut
@@ -112,6 +116,22 @@ public class User {
 
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
+    }
+
+    /**
+     * Getter sur le numéro de téléphone
+     * @return phoneNumber
+     */
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    /**
+     * Setter sur le numéro de téléphone
+     * @param phoneNumber
+     */
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     /**
