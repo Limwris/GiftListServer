@@ -43,10 +43,11 @@ public class RestController {
     @RequestMapping(value = "invite", method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public boolean inviteUserToRoom(@RequestHeader(value="X-Auth-Token") String token,
+                                    @RequestBody UserDto userDto,
                                     @RequestBody RoomDto roomDto) throws Exception {
         logger.info("[Entering] inviteUserToRoom");
         User user = TokenUtils.getUserFromToken(token);
-        restService.inviteUserToRoom(user.getUsername(), roomDto.getRoomId());
+        restService.inviteUserToRoom(userDto.getUsername(), roomDto.getRoomId());
         return true;
     }
 
