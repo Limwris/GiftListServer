@@ -1,8 +1,6 @@
 package com.nichesoftware.controllers;
 
-import com.nichesoftware.dto.GiftDto;
-import com.nichesoftware.dto.RoomDto;
-import com.nichesoftware.dto.UserDto;
+import com.nichesoftware.dto.*;
 import com.nichesoftware.model.Gift;
 import com.nichesoftware.model.Room;
 import com.nichesoftware.model.User;
@@ -14,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,11 +42,10 @@ public class RestController {
     @RequestMapping(value = "invite", method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public boolean inviteUserToRoom(@RequestHeader(value="X-Auth-Token") String token,
-                                    @RequestBody UserDto userDto,
-                                    @RequestBody RoomDto roomDto) throws Exception {
+                                    @RequestBody InvitationDto invitationDto) throws Exception {
         logger.info("[Entering] inviteUserToRoom");
-        User user = TokenUtils.getUserFromToken(token);
-        restService.inviteUserToRoom(userDto.getUsername(), roomDto.getRoomId());
+        TokenUtils.getUserFromToken(token);
+        restService.inviteUserToRoom(invitationDto.getUsername(), invitationDto.getRoomId());
         return true;
     }
 
@@ -140,10 +138,10 @@ public class RestController {
     @RequestMapping(value = "contacts", method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public List<User> retreiveAvailableContacts(@RequestHeader(value="X-Auth-Token") String token,
-                                                @RequestBody final List<String> phoneNumber) throws Exception {
+                                                @RequestBody final ContactDto contactDto) throws Exception {
         logger.info("[Entering] retreiveAvailableContacts");
         TokenUtils.getUserFromToken(token); // Throws NotAuthorizedException if not valid token
-        return restService.retreiveAvailableUsers(phoneNumber);
+        return restService.retreiveAvailableUsers(contactDto.getPhoneNumbers(), contactDto.getRoomId());
     }
 
     @RequestMapping(value = "lulu", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

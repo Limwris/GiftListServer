@@ -73,7 +73,7 @@ public class UserDao extends AbstractDaoJdbc implements IUserDao {
             rs = ps.executeQuery();
 
             // Need to move the cursor to the first row
-            if (rs.next()) {
+            while (rs.next()) {
                 User user = new User();
                 user.setId(rs.getInt(ID_ROW));
                 user.setUsername(rs.getString(USERNAME_ROW));

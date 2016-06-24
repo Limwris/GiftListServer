@@ -122,6 +122,34 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
     }
 
     @Override
+    public boolean hasRoom(User user, int roomId) throws ServerException, GenericException {
+        Connection cx = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        boolean hasRoom = false;
+
+        try {
+            cx = dataSource.getConnection();
+
+            String sql = "SELECT * FROM user_room WHERE userId = ? AND roomId = ?";
+
+            ps = cx.prepareStatement(sql);
+            ps.setString(1, user.getUsername()); // (1,..) premier point d'interrogation
+            ps.setInt(2, roomId);
+            rs = ps.executeQuery();
+            hasRoom = rs.next();
+
+        } catch (SQLException e) {
+            handleSqlException(e);
+            throw new GenericException();
+        } finally {
+            close(cx, ps, rs);
+        }
+
+        return hasRoom;
+    }
+
+    @Override
     public void getAllRooms(User user) throws ServerException, GenericException {
 
         Connection cx = null;

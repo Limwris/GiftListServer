@@ -1,13 +1,17 @@
 package com.nichesoftware.services;
 
+import com.nichesoftware.controllers.RestController;
 import com.nichesoftware.dao.*;
 import com.nichesoftware.exceptions.*;
 import com.nichesoftware.model.Gift;
 import com.nichesoftware.model.Room;
 import com.nichesoftware.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -15,6 +19,7 @@ import java.util.List;
  */
 @Service
 public class RestService implements IRestService {
+    private static final Logger logger = LoggerFactory.getLogger(RestController.class.getSimpleName());
     @Autowired
     private IGiftDao giftDao;
     @Autowired
@@ -121,12 +126,17 @@ public class RestService implements IRestService {
     }
 
     @Override
-    public List<User> retreiveAvailableUsers(List<String> phoneNumber) throws GenericException, ServerException {
+    public List<User> retreiveAvailableUsers(List<String> phoneNumbers, int roomId) throws GenericException, ServerException {
+        logger.info("[Entering] retreiveAvailableUsers");
+
         List<User> users = userDao.retreiveAllUsers();
 
-        for (User user : users) {
-            if (phoneNumber.contains(user.getPhoneNumber())) {
-                users.remove(user);
+        for (Iterator<User> iter = users.listIterator(); iter.hasNext(); ) {
+            User user = iter.next();
+            // - Si le numéro de téléphone de l'utilisateur n'est pas présent dans la liste des numéros
+            // - Ou si l'utilisateur est déjà dans la salle passée en paramètre
+            if (!phoneNumbers.contains(user.getPhoneNumber()) || roomDao.hasRoom(user, roomId)) {
+                iter.remove();
             }
         }
 

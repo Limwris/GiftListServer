@@ -21,6 +21,7 @@ public interface IRoomDao {
     Room saveRoom(User user, final String roomName, final String occasion) throws ServerException, GenericException;
     // Retreive
     void getRoom(User user, final int id) throws ServerException, GenericException;
+    boolean hasRoom(User user, int roomId) throws ServerException, GenericException;
     Room getRoom(int id) throws ServerException, GenericException;
     void getAllRooms(User user) throws ServerException, GenericException;
     // Update
