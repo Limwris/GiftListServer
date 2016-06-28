@@ -1,5 +1,7 @@
 package com.nichesoftware.model;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +32,7 @@ public class Room {
     /**
      * Liste des cadeaux associés à cette personne
      */
+    @JsonIgnore
     private List<Gift> giftList = new ArrayList<Gift>();
 
 

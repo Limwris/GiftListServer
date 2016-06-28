@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,7 +43,19 @@ public class RestController {
                                     @RequestBody InvitationDto invitationDto) throws Exception {
         logger.info("[Entering] inviteUserToRoom");
         TokenUtils.getUserFromToken(token);
-        restService.inviteUserToRoom(invitationDto.getUsername(), invitationDto.getRoomId());
+        restService.inviteUserToRoom(invitationDto.getUsername(),
+                invitationDto.getRoomId());
+        return true;
+    }
+
+    @RequestMapping(value = "accept", method = RequestMethod.POST,
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public boolean acceptInvitationToRoom(@RequestHeader(value="X-Auth-Token") String token,
+                                          @RequestBody AcceptInvitationDto acceptInvitationDto) throws Exception {
+        logger.info("[Entering] acceptInvitationToRoom");
+        User user = TokenUtils.getUserFromToken(token);
+        restService.acceptInvitationToRoom(user.getUsername(), acceptInvitationDto.getToken(),
+                acceptInvitationDto.getRoomId());
         return true;
     }
 
@@ -117,7 +127,7 @@ public class RestController {
     public String authenticate(@RequestBody final UserDto userDto) throws Exception {
         logger.info("[Entering] authenticate");
         User user = restService.authenticate(userDto.getUsername(), userDto.getPassword());
-        return TokenUtils.generateToken(user);
+        return TokenUtils.generateUserToken(user);
     }
 
     @RequestMapping(value = "authentication", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -131,8 +141,18 @@ public class RestController {
             produces = MediaType.TEXT_PLAIN_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public String register(@RequestBody final UserDto userDto) throws Exception {
         logger.info("[Entering] register");
-        User user = restService.createUser(userDto.getUsername(), userDto.getPassword());
-        return TokenUtils.generateToken(user);
+        User user = restService.createUser(userDto.getUsername(), userDto.getPassword(), userDto.getPhoneNumber());
+        return TokenUtils.generateUserToken(user);
+    }
+
+    @RequestMapping(value = "register/{registerId}", method = RequestMethod.POST,
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public boolean registerDevice(@RequestHeader(value="X-Auth-Token") String token,
+                                  @PathVariable final String registerId) throws Exception {
+        logger.info("[Entering] registerDevice");
+        User user = TokenUtils.getUserFromToken(token);
+        restService.updateGcmToken(user.getUsername(), registerId);
+        return true;
     }
 
     @RequestMapping(value = "contacts", method = RequestMethod.POST,
@@ -142,40 +162,5 @@ public class RestController {
         logger.info("[Entering] retreiveAvailableContacts");
         TokenUtils.getUserFromToken(token); // Throws NotAuthorizedException if not valid token
         return restService.retreiveAvailableUsers(contactDto.getPhoneNumbers(), contactDto.getRoomId());
-    }
-
-    @RequestMapping(value = "lulu", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Room> lulu(@RequestHeader(value="X-Auth-Token") String token) throws Exception {
-        logger.info("[Entering] lulu");
-        List<Room> rooms = new ArrayList<>();
-        List<Gift> gifts = new ArrayList<>();
-
-        User user1 = new User();
-        user1.setUsername("Jean-Bertrand");
-        user1.setId(1);
-        User user2 = new User();
-        user2.setUsername("Marie-Pierre");
-        user2.setId(2);
-
-        Gift gift = new Gift(1);
-        gift.setName("Ours en peluche");
-        gift.setPrice(22.05);
-        gift.getAmountByUser().put(1, 7d);
-        gift.getUserById().put(1, user1);
-        gift.getAmountByUser().put(2, 12d);
-        gift.getUserById().put(2, user2);
-        gifts.add(gift);
-        gift = new Gift(2);
-        gift.setName("Playstation 8");
-        gift.setPrice(455.99);
-        gift.getAmountByUser().put(1, 60d);
-        gift.getUserById().put(1, user1);
-        gift.getAmountByUser().put(2, 35d);
-        gift.getUserById().put(2, user2);
-        gifts.add(gift);
-        rooms.add(new Room(0, "John Doe", "Anniversaire", gifts));
-        rooms.add(new Room(1, "Jane Doe", "Noël"));
-        rooms.add(new Room(2, "Jean-Charles Dupond", "Pot de départ"));
-        return rooms;
     }
 }

@@ -160,7 +160,7 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
 
         try {
             cx = dataSource.getConnection();
-            String sql= "INSERT INTO user_gift(userId, giftId, allocatedAmount) VALUES (?, ?, ?);";
+            String sql= "UPDATE user_gift(userId, giftId, allocatedAmount) VALUES (?, ?, ?);";
             ps = cx.prepareStatement(sql);
             ps.setInt(1, user.getId());
             ps.setInt(2, gift.getId());

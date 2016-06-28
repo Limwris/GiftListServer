@@ -1,6 +1,7 @@
 package com.nichesoftware.services;
 
 import com.nichesoftware.exceptions.GenericException;
+import com.nichesoftware.exceptions.NotAuthorizedException;
 import com.nichesoftware.exceptions.ServerException;
 import com.nichesoftware.model.Gift;
 import com.nichesoftware.model.Room;
@@ -26,7 +27,8 @@ public interface IRestService {
     /******************************************************************************************************************/
     Room addRoom(final String username, final String roomName, final String occasion)
             throws ServerException, GenericException;
-    void inviteUserToRoom(final String username, int roomId) throws ServerException, GenericException;
+    void inviteUserToRoom(final String usernameToInvite, int roomId) throws ServerException, GenericException;
+    void acceptInvitationToRoom(final String username, final String invitationToken, int roomId) throws ServerException, GenericException, NotAuthorizedException;
     List<Room> getRooms(final String username) throws ServerException, GenericException;
     List<Room> getCompleteRooms(final String username) throws ServerException, GenericException;
     void deleteRoom(final String username, int roomId) throws ServerException, GenericException;
@@ -34,7 +36,8 @@ public interface IRestService {
     /******************************************************************************************************************/
     /********************                              User                                        ********************/
     /******************************************************************************************************************/
-    User createUser(final String username, final String password) throws GenericException, ServerException;
+    User createUser(final String username, final String password, final String phoneNumber) throws GenericException, ServerException;
     User authenticate(final String username, final String password) throws GenericException, ServerException;
     List<User> retreiveAvailableUsers(final List<String> phoneNumber, int roomId) throws GenericException, ServerException;
+    void updateGcmToken(final String username, final String gcmToken) throws GenericException, ServerException;
 }

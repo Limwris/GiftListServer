@@ -1,16 +1,25 @@
 package com.nichesoftware.services;
 
+import com.google.android.gcm.server.Message;
+import com.google.android.gcm.server.Result;
+import com.google.android.gcm.server.Sender;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.nichesoftware.controllers.RestController;
+import com.nichesoftware.controllers.TokenUtils;
 import com.nichesoftware.dao.*;
+import com.nichesoftware.dto.AcceptInvitationDto;
 import com.nichesoftware.exceptions.*;
 import com.nichesoftware.model.Gift;
 import com.nichesoftware.model.Room;
 import com.nichesoftware.model.User;
+import com.nichesoftware.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -90,10 +99,12 @@ public class RestService implements IRestService {
     }
 
     @Override
-    public User createUser(final String username, final String password) throws GenericException, ServerException {
+    public User createUser(final String username, final String password, final String phoneNumber) throws GenericException, ServerException {
+        logger.info("[Entering] RestService - createUser");
         User user = new User();
         user.setUsername(username);
         user.setPassword(password);
+        user.setPhoneNumber(phoneNumber);
         userDao.createUser(user);
 
         // Il est nécessaire de venir chercher l'utilisateur depuis la base car ce dernier
@@ -116,6 +127,7 @@ public class RestService implements IRestService {
      */
     @Override
     public User authenticate(final String username, final String password) throws GenericException, ServerException {
+        logger.info("[Entering] RestService - authenticate");
         User user = userDao.findByUsername(username);
 
         if(user == null || !user.getPassword().equals(password)) {
@@ -127,7 +139,7 @@ public class RestService implements IRestService {
 
     @Override
     public List<User> retreiveAvailableUsers(List<String> phoneNumbers, int roomId) throws GenericException, ServerException {
-        logger.info("[Entering] retreiveAvailableUsers");
+        logger.info("[Entering] RestService - retreiveAvailableUsers");
 
         List<User> users = userDao.retreiveAllUsers();
 
@@ -144,11 +156,65 @@ public class RestService implements IRestService {
     }
 
     @Override
-    public void inviteUserToRoom(final String username, int roomId) throws ServerException, GenericException {
+    public void updateGcmToken(final String username, final String gcmToken) throws GenericException, ServerException {
+        logger.info("[Entering] RestService - updateGcmToken");
+        User user = userDao.findByUsername(username);
+        user.setGcmId(gcmToken);
+        userDao.updateUser(user);
+    }
+
+    @Override
+    public void inviteUserToRoom(final String usernameToInvite, int roomId) throws ServerException, GenericException {
+        logger.info("[Entering] RestService - inviteUserToRoom");
+        User userToInvite = userDao.findByUsername(usernameToInvite);
+        if (StringUtils.isEmpty(userToInvite.getGcmId())) {
+            throw new InvitationException("L'utilisateur ne peut être contacté actuellement...");
+        }
+        Room room = roomDao.getRoom(roomId);
+
+        try {
+            final String token = TokenUtils.generateInvitationToken(userToInvite, room);
+            AcceptInvitationDto acceptInvitationDto = new AcceptInvitationDto();
+            acceptInvitationDto.setToken(token);
+            acceptInvitationDto.setRoomId(roomId);
+
+            logger.info(String.format("[Entering] RestService - inviteUserToRoom | token : %s", token));
+
+            Gson gson = new GsonBuilder().create();
+
+            Sender sender = new Sender(GcmConstants.API_KEY);
+
+            Message gcmMessage = new Message.Builder().timeToLive(180)
+                    .delayWhileIdle(true)
+                    .addData(GcmConstants.TITLE,
+                            String.format("Vous avez été invité à la salle %s", room.getOccasion()))
+                    .addData(GcmConstants.MESSAGE,
+                            gson.toJson(acceptInvitationDto))
+                    .addData(GcmConstants.CLICK_ACTION, GcmConstants.OPEN_INVITE_TO_ROOM_ACTIVITY).build();
+
+            logger.info(String.format("[Entering] RestService - inviteUserToRoom | message : %s", gcmMessage));
+
+            Result result = sender.send(gcmMessage, userToInvite.getGcmId(), 1);
+            result.getSuccess();
+        } catch (NotAuthorizedException|IOException e) {
+            throw new InvitationException();
+        }
+
+    }
+
+    @Override
+    public void acceptInvitationToRoom(final String username, final String invitationToken,
+                                       int roomId) throws ServerException, GenericException, NotAuthorizedException {
+        logger.info("[Entering] RestService - acceptInvitationToRoom");
         User user = userDao.findByUsername(username);
         if(user == null) {
             throw new AuthenticationException();
         }
+        int roomIdFromInvitation = TokenUtils.getInvitationFromToken(invitationToken, user);
+        if (roomIdFromInvitation != roomId) {
+            throw new NotAuthorizedException("Le token n'est pas valide.");
+        }
+
         Room room = roomDao.getRoom(roomId);
         roomDao.inviteUserToRoom(user, room);
     }
@@ -180,7 +246,6 @@ public class RestService implements IRestService {
         }
 
         return user.getRooms();
-
     }
 
     @Override

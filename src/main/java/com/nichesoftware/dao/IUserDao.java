@@ -21,4 +21,5 @@ public interface IUserDao {
     // Retreive user
     User findByUsername(String username) throws GenericException, ServerException;
     List<User> retreiveAllUsers() throws GenericException, ServerException;
+    void updateUser(User user) throws GenericException, ServerException;
 }

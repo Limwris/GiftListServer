@@ -91,6 +91,31 @@ public class UserDao extends AbstractDaoJdbc implements IUserDao {
     }
 
     @Override
+    public void updateUser(User user) throws GenericException, ServerException {
+        Connection cx = null;
+        PreparedStatement ps = null;
+
+        try {
+            cx = dataSource.getConnection();
+
+            String sql = "UPDATE user(phoneNumber, gcmId) VALUES (?, ?);";
+            ps = cx.prepareStatement(sql);
+            ps.setString(1, user.getPhoneNumber());
+            ps.setString(2, user.getGcmId());
+
+            int retVal = ps.executeUpdate();
+
+            if (retVal != 1) {
+            }
+
+        } catch (SQLException e) {
+            handleSqlException(e);
+        } finally {
+            close(cx, ps, null);
+        }
+    }
+
+    @Override
     public void createUser(User user) throws ServerException, GenericException {
 
         Connection cx = null;
@@ -99,11 +124,13 @@ public class UserDao extends AbstractDaoJdbc implements IUserDao {
         try {
             cx = dataSource.getConnection();
 
-            String sql = "INSERT INTO user(username, password, creationDate) VALUES (?, ?, ?);";
+            String sql = "INSERT INTO user(username, password, phoneNumber, gcmId, creationDate) VALUES (?, ?, ?, ?, ?);";
             ps = cx.prepareStatement(sql);
             ps.setString(1, user.getUsername());
             ps.setString(2, user.getPassword());
-            ps.setDate(3, new Date(user.getCreationDate().getTime()));
+            ps.setString(3, user.getPhoneNumber());
+            ps.setString(4, user.getGcmId());
+            ps.setDate(5, new Date(user.getCreationDate().getTime()));
 
             int retVal = ps.executeUpdate();
 

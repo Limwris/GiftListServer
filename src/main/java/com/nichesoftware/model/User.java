@@ -37,7 +37,13 @@ public class User {
     /**
      * Numéro de téléphone de l'utilisateur
      */
+    @JsonIgnore
     private String phoneNumber;
+    /**
+     * Identifiant GCM de l'utilisateur
+     */
+    @JsonIgnore
+    private String gcmId;
 
     /**
      * Consctructeur par défaut
@@ -132,6 +138,22 @@ public class User {
      */
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    /**
+     * Getter sur l'identifiant GCM de l'utilisateur
+     * @return
+     */
+    public String getGcmId() {
+        return gcmId;
+    }
+
+    /**
+     * Setter sur l'identifiant GCM de l'utilisateur
+     * @param gcmId
+     */
+    public void setGcmId(String gcmId) {
+        this.gcmId = gcmId;
     }
 
     /**

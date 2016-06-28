@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.ArrayList;
 
 /**
  * Created by Kattleya on 22/05/2016.
@@ -166,6 +167,10 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
 
             while (rs.next()){
                 user.addRoom(new Room(rs.getInt(ID_ROW), rs.getString(NAME_ROW), rs.getString(OCCASION_ROW)));
+            }
+
+            if (user.getRooms() == null) {
+                user.setRooms(new ArrayList<Room>());
             }
 
         } catch (SQLException e) {
