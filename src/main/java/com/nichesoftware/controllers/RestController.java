@@ -145,7 +145,7 @@ public class RestController {
         return TokenUtils.generateUserToken(user);
     }
 
-    @RequestMapping(value = "register/{registerId}", method = RequestMethod.POST,
+    @RequestMapping(value = "gcm/{registerId}", method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public boolean registerDevice(@RequestHeader(value="X-Auth-Token") String token,
                                   @PathVariable final String registerId) throws Exception {

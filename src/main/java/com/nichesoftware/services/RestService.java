@@ -28,7 +28,7 @@ import java.util.List;
  */
 @Service
 public class RestService implements IRestService {
-    private static final Logger logger = LoggerFactory.getLogger(RestController.class.getSimpleName());
+    private static final Logger logger = LoggerFactory.getLogger(RestService.class.getSimpleName());
     @Autowired
     private IGiftDao giftDao;
     @Autowired
@@ -100,7 +100,7 @@ public class RestService implements IRestService {
 
     @Override
     public User createUser(final String username, final String password, final String phoneNumber) throws GenericException, ServerException {
-        logger.info("[Entering] RestService - createUser");
+        logger.info("[Entering] createUser");
         User user = new User();
         user.setUsername(username);
         user.setPassword(password);
@@ -127,7 +127,7 @@ public class RestService implements IRestService {
      */
     @Override
     public User authenticate(final String username, final String password) throws GenericException, ServerException {
-        logger.info("[Entering] RestService - authenticate");
+        logger.info("[Entering] authenticate");
         User user = userDao.findByUsername(username);
 
         if(user == null || !user.getPassword().equals(password)) {
@@ -139,7 +139,7 @@ public class RestService implements IRestService {
 
     @Override
     public List<User> retreiveAvailableUsers(List<String> phoneNumbers, int roomId) throws GenericException, ServerException {
-        logger.info("[Entering] RestService - retreiveAvailableUsers");
+        logger.info("[Entering] retreiveAvailableUsers");
 
         List<User> users = userDao.retreiveAllUsers();
 
@@ -157,7 +157,7 @@ public class RestService implements IRestService {
 
     @Override
     public void updateGcmToken(final String username, final String gcmToken) throws GenericException, ServerException {
-        logger.info("[Entering] RestService - updateGcmToken");
+        logger.info("[Entering] updateGcmToken");
         User user = userDao.findByUsername(username);
         user.setGcmId(gcmToken);
         userDao.updateUser(user);
@@ -165,7 +165,7 @@ public class RestService implements IRestService {
 
     @Override
     public void inviteUserToRoom(final String usernameToInvite, int roomId) throws ServerException, GenericException {
-        logger.info("[Entering] RestService - inviteUserToRoom");
+        logger.info("[Entering] inviteUserToRoom");
         User userToInvite = userDao.findByUsername(usernameToInvite);
         if (StringUtils.isEmpty(userToInvite.getGcmId())) {
             throw new InvitationException("L'utilisateur ne peut être contacté actuellement...");
@@ -178,7 +178,7 @@ public class RestService implements IRestService {
             acceptInvitationDto.setToken(token);
             acceptInvitationDto.setRoomId(roomId);
 
-            logger.info(String.format("[Entering] RestService - inviteUserToRoom | token : %s", token));
+            logger.info(String.format("[Entering] inviteUserToRoom | token : %s", token));
 
             Gson gson = new GsonBuilder().create();
 
@@ -192,7 +192,7 @@ public class RestService implements IRestService {
                             gson.toJson(acceptInvitationDto))
                     .addData(GcmConstants.CLICK_ACTION, GcmConstants.OPEN_INVITE_TO_ROOM_ACTIVITY).build();
 
-            logger.info(String.format("[Entering] RestService - inviteUserToRoom | message : %s", gcmMessage));
+            logger.info(String.format("[Entering] inviteUserToRoom | message : %s", gcmMessage));
 
             Result result = sender.send(gcmMessage, userToInvite.getGcmId(), 1);
             result.getSuccess();
@@ -205,7 +205,7 @@ public class RestService implements IRestService {
     @Override
     public void acceptInvitationToRoom(final String username, final String invitationToken,
                                        int roomId) throws ServerException, GenericException, NotAuthorizedException {
-        logger.info("[Entering] RestService - acceptInvitationToRoom");
+        logger.info("[Entering] acceptInvitationToRoom");
         User user = userDao.findByUsername(username);
         if(user == null) {
             throw new AuthenticationException();
