@@ -168,6 +168,7 @@ public class RestService implements IRestService {
         logger.info("[Entering] inviteUserToRoom");
         User userToInvite = userDao.findByUsername(usernameToInvite);
         if (StringUtils.isEmpty(userToInvite.getGcmId())) {
+            logger.error("[Entering] inviteUserToRoom - GCM id n'existe pas pour cet utilisateur.");
             throw new InvitationException("L'utilisateur ne peut être contacté actuellement...");
         }
         Room room = roomDao.getRoom(roomId);

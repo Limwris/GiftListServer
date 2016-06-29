@@ -33,7 +33,7 @@ public class UserDao extends AbstractDaoJdbc implements IUserDao {
         try {
             cx = dataSource.getConnection();
 
-            String sql = "SELECT idUser, username, password, creationDate FROM user WHERE username = ?";
+            String sql = "SELECT idUser, username, password, phoneNumber, gcmId, creationDate FROM user WHERE username = ?";
 
             ps = cx.prepareStatement(sql);
             ps.setString(1, username); // (1,..) premier point d'interrogation
@@ -45,6 +45,8 @@ public class UserDao extends AbstractDaoJdbc implements IUserDao {
                 user.setId(rs.getInt(ID_ROW));
                 user.setUsername(rs.getString(USERNAME_ROW));
                 user.setPassword(rs.getString(PASSWORD_ROW));
+                user.setPhoneNumber(rs.getString(PHONE_NUMBER_ROW));
+                user.setGcmId(rs.getString(GCM_ID_ROW));
                 user.setCreationDate(rs.getDate(CREATION_DATE_ROW));
             }
 
@@ -98,10 +100,11 @@ public class UserDao extends AbstractDaoJdbc implements IUserDao {
         try {
             cx = dataSource.getConnection();
 
-            String sql = "UPDATE user(phoneNumber, gcmId) VALUES (?, ?);";
+            String sql = "UPDATE user SET phoneNumber = ?, gcmId = ? WHERE username = ?;";
             ps = cx.prepareStatement(sql);
             ps.setString(1, user.getPhoneNumber());
             ps.setString(2, user.getGcmId());
+            ps.setString(3, user.getUsername());
 
             int retVal = ps.executeUpdate();
 

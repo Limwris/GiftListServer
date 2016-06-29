@@ -14,6 +14,7 @@ public interface IUserDao {
     String USERNAME_ROW = "username";
     String PASSWORD_ROW = "password";
     String PHONE_NUMBER_ROW = "phoneNumber";
+    String GCM_ID_ROW = "gcmId";
     String CREATION_DATE_ROW = "creationDate";
 
     // Create user
