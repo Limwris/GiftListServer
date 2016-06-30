@@ -31,6 +31,7 @@ public interface IRestService {
     void acceptInvitationToRoom(final String username, final String invitationToken, int roomId) throws ServerException, GenericException, NotAuthorizedException;
     List<Room> getRooms(final String username) throws ServerException, GenericException;
     List<Room> getCompleteRooms(final String username) throws ServerException, GenericException;
+    Room getRoom(int roomId) throws ServerException, GenericException;
     void deleteRoom(final String username, int roomId) throws ServerException, GenericException;
 
     /******************************************************************************************************************/

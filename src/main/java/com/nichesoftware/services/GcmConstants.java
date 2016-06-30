@@ -5,8 +5,7 @@ package com.nichesoftware.services;
  */
 public interface GcmConstants {
     String API_KEY = "";
-    String TITLE = "title";
-    String MESSAGE = "message";
-    String CLICK_ACTION = "click_action";
+    String NOTIFICATION = "notification";
+    String DATA = "data";
     String OPEN_INVITE_TO_ROOM_ACTIVITY = "OPEN_INVITE_TO_ROOM_ACTIVITY";
 }

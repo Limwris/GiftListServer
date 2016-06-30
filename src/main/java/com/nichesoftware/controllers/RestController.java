@@ -94,6 +94,15 @@ public class RestController {
         return restService.updateGift(user.getUsername(), giftDto.getRoomId(), giftDto.getId(), giftDto.getAmount());
     }
 
+    @RequestMapping(value = "room/{roomId}", method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Room getRoomInformation(@RequestHeader(value="X-Auth-Token") String token,
+                        @PathVariable("roomId") int roomId) throws Exception {
+        logger.info("[Entering] getRoomInformation");
+        User user = TokenUtils.getUserFromToken(token);
+        return restService.getRoom(roomId);
+    }
+
     @RequestMapping(value = "room", method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public Room addRoom(@RequestHeader(value="X-Auth-Token") String token,

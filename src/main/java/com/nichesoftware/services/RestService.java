@@ -5,10 +5,10 @@ import com.google.android.gcm.server.Result;
 import com.google.android.gcm.server.Sender;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.nichesoftware.controllers.RestController;
 import com.nichesoftware.controllers.TokenUtils;
 import com.nichesoftware.dao.*;
 import com.nichesoftware.dto.AcceptInvitationDto;
+import com.nichesoftware.dto.NotificationDto;
 import com.nichesoftware.exceptions.*;
 import com.nichesoftware.model.Gift;
 import com.nichesoftware.model.Room;
@@ -185,18 +185,21 @@ public class RestService implements IRestService {
 
             Sender sender = new Sender(GcmConstants.API_KEY);
 
+            NotificationDto notificationDto = new NotificationDto();
+            notificationDto.setTitle("Invitation");
+            notificationDto.setBody(String.format("Vous avez ete invite a la salle %s", room.getOccasion()));
+            notificationDto.setClickAction(GcmConstants.OPEN_INVITE_TO_ROOM_ACTIVITY);
+
             Message gcmMessage = new Message.Builder().timeToLive(180)
                     .delayWhileIdle(true)
-                    .addData(GcmConstants.TITLE,
-                            String.format("Vous avez été invité à la salle %s", room.getOccasion()))
-                    .addData(GcmConstants.MESSAGE,
-                            gson.toJson(acceptInvitationDto))
-                    .addData(GcmConstants.CLICK_ACTION, GcmConstants.OPEN_INVITE_TO_ROOM_ACTIVITY).build();
+                    .addData(GcmConstants.NOTIFICATION, gson.toJson(notificationDto))
+                    .addData(GcmConstants.DATA,
+                            gson.toJson(acceptInvitationDto)).build();
 
-            logger.info(String.format("[Entering] inviteUserToRoom | message : %s", gcmMessage));
+            logger.info(String.format("[Entering] inviteUserToRoom | message : %s / to : %s", gcmMessage, userToInvite.getGcmId()));
 
             Result result = sender.send(gcmMessage, userToInvite.getGcmId(), 1);
-            result.getSuccess();
+            logger.info(String.format("[Entering] inviteUserToRoom | result : %s", result.toString()));
         } catch (NotAuthorizedException|IOException e) {
             throw new InvitationException();
         }
@@ -247,6 +250,14 @@ public class RestService implements IRestService {
         }
 
         return user.getRooms();
+    }
+
+    @Override
+    public Room getRoom(int roomId) throws ServerException, GenericException {
+        Room room = roomDao.getRoom(roomId);
+        // Not needed information
+        room.setGiftList(null);
+        return room;
     }
 
     @Override
