@@ -23,12 +23,12 @@ public class User {
      * JsonIgnore protects from Jackson serializing this field.
      */
     @JsonIgnore
-    private String password;
+    private transient String password;
     /**
      * Liste des salles
      */
     @JsonIgnore
-    private List<Room> rooms;
+    private transient List<Room> rooms;
     /**
      * Date de création de l'utilisateur
      * Utile pour générer le token
@@ -38,12 +38,12 @@ public class User {
      * Numéro de téléphone de l'utilisateur
      */
     @JsonIgnore
-    private String phoneNumber;
+    private transient String phoneNumber;
     /**
      * Identifiant GCM de l'utilisateur
      */
     @JsonIgnore
-    private String gcmId;
+    private transient String gcmId;
 
     /**
      * Consctructeur par défaut
