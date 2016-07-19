@@ -133,7 +133,7 @@ public class UserDao extends AbstractDaoJdbc implements IUserDao {
             ps.setString(2, user.getPassword());
             ps.setString(3, user.getPhoneNumber());
             ps.setString(4, user.getGcmId());
-            ps.setDate(5, new Date(user.getCreationDate().getTime()));
+            ps.setDate(5, new Date(new java.util.Date().getTime()));
 
             int retVal = ps.executeUpdate();
 

@@ -43,20 +43,25 @@ public class RestController {
                                     @RequestBody InvitationDto invitationDto) throws Exception {
         logger.info("[Entering] inviteUserToRoom");
         TokenUtils.getUserFromToken(token);
-        restService.inviteUserToRoom(invitationDto.getUsername(),
-                invitationDto.getRoomId());
+        restService.inviteUserToRoom(invitationDto.getUsername(), invitationDto.getRoomId());
         return true;
     }
 
     @RequestMapping(value = "accept", method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public boolean acceptInvitationToRoom(@RequestHeader(value="X-Auth-Token") String token,
-                                          @RequestBody AcceptInvitationDto acceptInvitationDto) throws Exception {
+                                          @RequestBody RoomDto roomDto) throws Exception {
         logger.info("[Entering] acceptInvitationToRoom");
         User user = TokenUtils.getUserFromToken(token);
-        restService.acceptInvitationToRoom(user.getUsername(), acceptInvitationDto.getToken(),
-                acceptInvitationDto.getRoomId());
+        restService.acceptInvitationToRoom(user.getUsername(), roomDto.getRoomId());
         return true;
+    }
+
+     @RequestMapping(value = "invite", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+     public List<Room> getPendingInvitation(@RequestHeader(value="X-Auth-Token") String token) throws Exception {
+         logger.info("[Entering] getPendingInvitation");
+         User user = TokenUtils.getUserFromToken(token);
+         return restService.getPendingInvitation(user.getUsername());
     }
 
     @RequestMapping(value = "gifts", method = RequestMethod.POST,
@@ -124,12 +129,11 @@ public class RestController {
 
     @RequestMapping(value = "room", method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public boolean deleteRoom(@RequestHeader(value="X-Auth-Token") String token,
+    public List<Room> deleteRoom(@RequestHeader(value="X-Auth-Token") String token,
                               @RequestBody RoomDto roomDto) throws Exception {
         logger.info("[Entering] deleteRoom");
         User user = TokenUtils.getUserFromToken(token);
-        restService.deleteRoom(user.getUsername(), roomDto.getRoomId());
-        return true;
+        return restService.deleteRoom(user.getUsername(), roomDto.getRoomId());
     }
 
     @RequestMapping(value = "authentication", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)

@@ -7,10 +7,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.nichesoftware.controllers.TokenUtils;
 import com.nichesoftware.dao.*;
-import com.nichesoftware.dto.AcceptInvitationDto;
+import com.nichesoftware.dto.InvitationDto;
 import com.nichesoftware.dto.NotificationDto;
 import com.nichesoftware.exceptions.*;
 import com.nichesoftware.model.Gift;
+import com.nichesoftware.model.Invitation;
 import com.nichesoftware.model.Room;
 import com.nichesoftware.model.User;
 import com.nichesoftware.utils.StringUtils;
@@ -20,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -35,6 +38,8 @@ public class RestService implements IRestService {
     private IRoomDao roomDao;
     @Autowired
     private IUserDao userDao;
+    @Autowired
+    private IInvitationDao invitationDao;
 
     @Override
     public Gift addGift(final String username, int roomId, final String giftName,
@@ -171,56 +176,66 @@ public class RestService implements IRestService {
             logger.error("[Entering] inviteUserToRoom - GCM id n'existe pas pour cet utilisateur.");
             throw new InvitationException("L'utilisateur ne peut être contacté actuellement...");
         }
+
         Room room = roomDao.getRoom(roomId);
+        Date expirationDate = invitationDao.inviteToRoom(userToInvite, room);
+
+        Invitation invitation = new Invitation();
+        invitation.setExpireDate(expirationDate);
+        invitation.setRoom(room);
+        invitation.setInvitedUser(userToInvite);
+
+        Gson gson = new GsonBuilder().create();
+
+        Sender sender = new Sender(GcmConstants.API_KEY);
+
+        NotificationDto notificationDto = new NotificationDto();
+        notificationDto.setTitle("Invitation");
+        notificationDto.setBody(String.format("Vous avez ete invite a la salle %s", room.getOccasion()));
+        notificationDto.setClickAction(GcmConstants.OPEN_INVITE_TO_ROOM_ACTIVITY);
+
+        Message gcmMessage = new Message.Builder().timeToLive(180)
+                .delayWhileIdle(true)
+                .addData(GcmConstants.NOTIFICATION, gson.toJson(notificationDto))
+                .addData(GcmConstants.DATA, gson.toJson(invitation)).build();
+
+        logger.info(String.format("[Entering] inviteUserToRoom | message : %s / to : %s", gcmMessage, userToInvite.getGcmId()));
 
         try {
-            final String token = TokenUtils.generateInvitationToken(userToInvite, room);
-            AcceptInvitationDto acceptInvitationDto = new AcceptInvitationDto();
-            acceptInvitationDto.setToken(token);
-            acceptInvitationDto.setRoomId(roomId);
-
-            logger.info(String.format("[Entering] inviteUserToRoom | token : %s", token));
-
-            Gson gson = new GsonBuilder().create();
-
-            Sender sender = new Sender(GcmConstants.API_KEY);
-
-            NotificationDto notificationDto = new NotificationDto();
-            notificationDto.setTitle("Invitation");
-            notificationDto.setBody(String.format("Vous avez ete invite a la salle %s", room.getOccasion()));
-            notificationDto.setClickAction(GcmConstants.OPEN_INVITE_TO_ROOM_ACTIVITY);
-
-            Message gcmMessage = new Message.Builder().timeToLive(180)
-                    .delayWhileIdle(true)
-                    .addData(GcmConstants.NOTIFICATION, gson.toJson(notificationDto))
-                    .addData(GcmConstants.DATA,
-                            gson.toJson(acceptInvitationDto)).build();
-
-            logger.info(String.format("[Entering] inviteUserToRoom | message : %s / to : %s", gcmMessage, userToInvite.getGcmId()));
-
             Result result = sender.send(gcmMessage, userToInvite.getGcmId(), 1);
             logger.info(String.format("[Entering] inviteUserToRoom | result : %s", result.toString()));
-        } catch (NotAuthorizedException|IOException e) {
+        } catch (IOException e) {
             throw new InvitationException();
         }
 
     }
 
     @Override
-    public void acceptInvitationToRoom(final String username, final String invitationToken,
-                                       int roomId) throws ServerException, GenericException, NotAuthorizedException {
+    public void acceptInvitationToRoom(final String username, int roomId) throws ServerException, GenericException {
         logger.info("[Entering] acceptInvitationToRoom");
         User user = userDao.findByUsername(username);
         if(user == null) {
             throw new AuthenticationException();
         }
-        int roomIdFromInvitation = TokenUtils.getInvitationFromToken(invitationToken, user);
-        if (roomIdFromInvitation != roomId) {
-            throw new NotAuthorizedException("Le token n'est pas valide.");
-        }
 
         Room room = roomDao.getRoom(roomId);
-        roomDao.inviteUserToRoom(user, room);
+        invitationDao.acceptInvitation(user, room);
+    }
+
+    @Override
+    public List<Room> getPendingInvitation(String username) throws GenericException, ServerException {
+        logger.info("[Entering] acceptInvitationToRoom");
+        User user = userDao.findByUsername(username);
+        if(user == null) {
+            throw new AuthenticationException();
+        }
+        List<Integer> roomIds = invitationDao.checkForPendingInvitation(user);
+
+        List<Room> retVal = new ArrayList<>();
+        for (int roomId : roomIds) {
+            retVal.add(roomDao.getRoom(roomId));
+        }
+        return retVal;
     }
 
     @Override
@@ -261,7 +276,7 @@ public class RestService implements IRestService {
     }
 
     @Override
-    public void deleteRoom(String username, int roomId) throws ServerException, GenericException {
+    public List<Room> deleteRoom(String username, int roomId) throws ServerException, GenericException {
         User user = userDao.findByUsername(username);
         if(user == null) {
             throw new AuthenticationException();
@@ -275,6 +290,15 @@ public class RestService implements IRestService {
         }
 
         roomDao.deleteRoom(room, user);
+
+        // On rafraîchit toutes les salles à l'utilisateur
+        user.setRooms(null);
+        roomDao.getAllRooms(user);
+        for (Room temp : user.getRooms()) {
+            giftDao.getGifts(user, temp);
+        }
+
+        return user.getRooms();
     }
 
     @Override
@@ -309,5 +333,13 @@ public class RestService implements IRestService {
 
     public IRoomDao getRoomDao() {
         return roomDao;
+    }
+
+    public void setInvitationDao(IInvitationDao invitationDao) {
+        this.invitationDao = invitationDao;
+    }
+
+    public IInvitationDao getInvitationDao() {
+        return this.invitationDao;
     }
 }

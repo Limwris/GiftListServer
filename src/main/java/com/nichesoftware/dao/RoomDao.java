@@ -22,32 +22,6 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
     private DataSource dataSource;
 
     @Override
-    public void inviteUserToRoom(User user, Room room) throws ServerException, GenericException {
-        Connection cx = null;
-        PreparedStatement ps = null;
-
-        try {
-            cx = dataSource.getConnection();
-
-            final String sql = "INSERT INTO user_room(roomId, userId) VALUES (?, ?);";
-            ps = cx.prepareStatement(sql);
-            ps.setInt(1, room.getId());
-            ps.setInt(2, user.getId());
-
-            int retVal = ps.executeUpdate();
-
-            if (retVal != 1) {
-                // Todo
-            }
-
-        } catch (SQLException e) {
-            handleSqlException(e);
-        } finally {
-            close(cx, ps, null);
-        }
-    }
-
-    @Override
     public Room saveRoom(User user, final String roomName,
                          final String occasion) throws ServerException, GenericException {
         Connection cx = null;
@@ -219,6 +193,27 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
 
     @Override
     public void deleteRoom(Room room, User user) throws ServerException, GenericException {
+        Connection cx = null;
+        PreparedStatement ps = null;
+
+        try {
+            cx = dataSource.getConnection();
+
+            final String sql = "DELETE FROM user_room WHERE roomId = ? AND userId = ?;";
+            ps = cx.prepareStatement(sql);
+            ps.setInt(1, room.getId());
+            ps.setInt(2, user.getId());
+
+            int retVal = ps.executeUpdate();
+            if (retVal != 1) {
+                // Todo
+            }
+
+        } catch (SQLException e) {
+            handleSqlException(e);
+        } finally {
+            close(cx, ps, null);
+        }
     }
 
     /**

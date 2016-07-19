@@ -1,14 +1,11 @@
-package com.nichesoftware.dto;
-
-import com.nichesoftware.model.Room;
-import com.nichesoftware.model.User;
+package com.nichesoftware.model;
 
 import java.util.Date;
 
 /**
  * Created by n_che on 27/06/2016.
  */
-public class InvitationTokenDto {
+public class Invitation {
     /**
      * Utilisateur étant invité
      */

@@ -13,7 +13,6 @@ public interface IRoomDao {
     String NAME_ROW = "roomName";
     String OCCASION_ROW = "occasion";
 
-    void inviteUserToRoom(User user, Room room) throws ServerException, GenericException;
     //////////////////
     //     CRUD     //
     //////////////////

@@ -22,6 +22,7 @@
         <property name="userDao" ref="userDao" />
         <property name="roomDao" ref="roomDao" />
         <property name="giftDao" ref="giftDao" />
+        <property name="invitationDao" ref="invitationDao" />
     </bean>
     <bean id="userDao" class="com.nichesoftware.dao.UserDao">
         <property name="dataSource" ref="ds" />
@@ -30,6 +31,9 @@
         <property name="dataSource" ref="ds" />
     </bean>
     <bean id="giftDao" class="com.nichesoftware.dao.GiftDao">
+        <property name="dataSource" ref="ds" />
+    </bean>
+    <bean id="invitationDao" class="com.nichesoftware.dao.InvitationDao">
         <property name="dataSource" ref="ds" />
     </bean>
 
