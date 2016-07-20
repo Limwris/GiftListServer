@@ -65,6 +65,7 @@ public class InvitationDao extends AbstractDaoJdbc implements IInvitationDao {
 
     @Override
     public List<Integer> checkForPendingInvitation(User user) throws ServerException, GenericException {
+        logger.info("[Entering] checkForPendingInvitation");
         Connection cx = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -82,7 +83,7 @@ public class InvitationDao extends AbstractDaoJdbc implements IInvitationDao {
                 java.util.Date date = new Date(rs.getDate(EXPIRATION_DATE_ROW).getTime());
                 // Si la date d'expiration est dépassée, alors on supprime l'invitation
                 if (date.before(new java.util.Date())) {
-                    delete(rs.getInt(USER_ID_ROW), rs.getInt(ROOM_ID_ROW));
+                    delete(cx, rs.getInt(USER_ID_ROW), rs.getInt(ROOM_ID_ROW));
                 } else { // Sinon, on ajoute à la liste des salles auxquelles l'utilisateur est invité
                     retVal.add(rs.getInt(ROOM_ID_ROW));
                 }
@@ -99,6 +100,7 @@ public class InvitationDao extends AbstractDaoJdbc implements IInvitationDao {
 
     @Override
     public void acceptInvitation(User user, Room room) throws ServerException, GenericException {
+        logger.info("[Entering] acceptInvitation");
         Connection cx = null;
         PreparedStatement ps = null;
 
@@ -113,7 +115,7 @@ public class InvitationDao extends AbstractDaoJdbc implements IInvitationDao {
             int retVal = ps.executeUpdate();
 
             // Si l'invitation a été correctement traité, alors on la supprime de la table
-            delete(user.getId(), room.getId());
+            delete(cx, user.getId(), room.getId());
 
             if (retVal != 1) {
                 // Todo
@@ -129,32 +131,39 @@ public class InvitationDao extends AbstractDaoJdbc implements IInvitationDao {
 
     @Override
     public void deleteInvitation(User user, Room room) throws ServerException, GenericException {
-        delete(user.getId(), room.getId());
-    }
-
-    private void delete(int userId, int roomId) throws ServerException, GenericException {
+        logger.info("[Entering] deleteInvitation");
         Connection cx = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
 
         try {
             cx = dataSource.getConnection();
 
-            final String sql = "DELETE FROM invitation WHERE roomId = ? AND userId = ?;";
-            ps = cx.prepareStatement(sql);
-            ps.setInt(1, roomId);
-            ps.setInt(2, userId);
-
-            rs = ps.executeQuery();
-            do {
-                // Todo
-            } while (rs.next());
+            delete(cx, user.getId(), room.getId());
 
         } catch (SQLException e) {
             handleSqlException(e);
         } finally {
-            close(cx, ps, rs);
+            close(cx, null, null);
         }
+    }
+
+    /**
+     * Méthode permettant de supprimer une invitation
+     * @param cx
+     * @param userId
+     * @param roomId
+     * @throws SQLException
+     */
+    private void delete(Connection cx, int userId, int roomId) throws SQLException {
+        logger.info("[Entering] delete");
+
+        final String sql = "DELETE FROM invitation WHERE roomId = ? AND userId = ?;";
+        PreparedStatement ps = cx.prepareStatement(sql);
+        ps.setInt(1, roomId);
+        ps.setInt(2, userId);
+
+        ps.executeUpdate();
+
+        try { if(ps != null) ps.close(); } catch (SQLException ignored) { }
     }
 
     /**
