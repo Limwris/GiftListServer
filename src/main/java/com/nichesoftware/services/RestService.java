@@ -99,7 +99,7 @@ public class RestService implements IRestService {
             throw new GenericException("Le cadeau n'existe pas dans la salle passée en paramètre");
         }
         // Modifier le montant alloué par l'utilisateur
-        gift.getAmountByUser().put(user.getId(), allocatedAmount);
+        gift.getAmountByUser().put(user.getUsername(), allocatedAmount);
         return giftDao.updateGift(user, gift);
     }
 
