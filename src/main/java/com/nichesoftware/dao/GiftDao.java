@@ -149,11 +149,11 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
 
         try {
             cx = dataSource.getConnection();
-            String sql= "UPDATE user_gift(userId, giftId, allocatedAmount) VALUES (?, ?, ?);";
+            String sql= "UPDATE user_gift SET allocatedAmount = ? WHERE userId = ? AND giftId = ?;";
             ps = cx.prepareStatement(sql);
-            ps.setInt(1, user.getId());
-            ps.setInt(2, gift.getId());
-            ps.setDouble(3, gift.getAmountByUser().get(user.getId()));
+            ps.setDouble(1, gift.getAmountByUser().get(user.getUsername()));
+            ps.setInt(2, user.getId());
+            ps.setInt(3, gift.getId());
 
             int retVal = ps.executeUpdate();
 
