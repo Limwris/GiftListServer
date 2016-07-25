@@ -8,6 +8,14 @@ import java.util.Map;
  */
 public class Gift {
     /**
+     * Constructeur
+     */
+    public Gift(int id) {
+        this.id = id;
+    }
+
+    // Fields ----------------------------------------------------------------------------------------------------------
+    /**
      * Identifiant unique du cadeau
      */
     private int id;
@@ -32,13 +40,7 @@ public class Gift {
      */
     private Map<String, Double> amountByUser = new HashMap<>();
 
-    /**
-     * Constructeur
-     */
-    public Gift(int id) {
-        this.id = id;
-    }
-
+    // Getter ----------------------------------------------------------------------------------------------------------
     /**
      * Getter sur l'identifiant unique du cadeau
      * @return id
@@ -56,27 +58,11 @@ public class Gift {
     }
 
     /**
-     * Setter sur le montant du cadeau
-     * @param price
-     */
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
-    /**
      * Getter sur le nom du cadeau
      * @return name
      */
     public String getName() {
         return name;
-    }
-
-    /**
-     * Setter sur le nom du cadeau
-     * @param name
-     */
-    public void setName(String name) {
-        this.name = name;
     }
 
     /**
@@ -88,14 +74,6 @@ public class Gift {
     }
 
     /**
-     * Setter sur l'url pointant vers un site proposant le cadeau
-     * @param url
-     */
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    /**
      * Getter sur le flag indiquant si la cadeau a été acheté
      * @return isBought
      */
@@ -104,19 +82,44 @@ public class Gift {
     }
 
     /**
-     * Setter sur le flag indiquant si la cadeau a été acheté
-     * @param isBought
-     */
-    public void setIsBought(boolean isBought) {
-        this.isBought = isBought;
-    }
-
-    /**
      * Getter sur les montants alloués par utilisateur au cadeau
      * @return
      */
     public Map<String, Double> getAmountByUser() {
         return amountByUser;
+    }
+
+    // Setter ----------------------------------------------------------------------------------------------------------
+    /**
+     * Setter sur le montant du cadeau
+     * @param price
+     */
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    /**
+     * Setter sur le nom du cadeau
+     * @param name
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * Setter sur l'url pointant vers un site proposant le cadeau
+     * @param url
+     */
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    /**
+     * Setter sur le flag indiquant si la cadeau a été acheté
+     * @param isBought
+     */
+    public void setIsBought(boolean isBought) {
+        this.isBought = isBought;
     }
 
     /**

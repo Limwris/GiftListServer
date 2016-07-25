@@ -1,17 +1,28 @@
 package com.nichesoftware.controllers;
 
+import com.google.gson.Gson;
 import com.nichesoftware.dto.*;
 import com.nichesoftware.model.Gift;
 import com.nichesoftware.model.Room;
 import com.nichesoftware.model.User;
 import com.nichesoftware.services.IRestService;
 import com.nichesoftware.services.RestService;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -27,6 +38,7 @@ import java.util.List;
 public class RestController {
     private static final Logger logger = LoggerFactory.getLogger(RestController.class.getSimpleName());
 
+    private static final String UPLOAD_PATH = "uploads";
     /**
      * Service
      */
@@ -81,13 +93,76 @@ public class RestController {
     }
 
     @RequestMapping(value = "gift", method = RequestMethod.POST,
-            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Gift addGift(@RequestHeader(value="X-Auth-Token") String token,
-                        @RequestBody GiftDto giftDto) throws Exception {
+                        @RequestPart("body") String giftDtoString,
+                        @RequestPart("file") MultipartFile file) throws Exception {
         logger.info("[Entering] addGift");
         User user = TokenUtils.getUserFromToken(token);
-        return restService.addGift(user.getUsername(), giftDto.getRoomId(), giftDto.getName(),
+        GiftDto giftDto = new Gson().fromJson(giftDtoString, GiftDto.class);
+        Gift gift = restService.addGift(user.getUsername(), giftDto.getRoomId(), giftDto.getName(),
                 giftDto.getPrice(), giftDto.getAmount());
+
+        if (file != null) {
+            logger.info(String.format("addGift - File [filename: %s, content-type: %s, size: %d]",
+                    file.getOriginalFilename(), file.getContentType(), file.getSize()));
+            if (validateImage(file)) {
+                logger.info("addGift - valid image");
+                File image = new File(Paths.get("").toAbsolutePath().toString()
+                        + File.separator
+                        + UPLOAD_PATH
+                        + File.separator
+                        + gift.getId()
+                        + ".jpg");
+                FileUtils.writeByteArrayToFile(image, file.getBytes());
+                logger.info(String.format("addGift - Image has been successfully stored on the following location: %s",
+                        image.getAbsolutePath()));
+            }
+        }
+        return gift;
+    }
+
+    /**
+     * Méthode permettant de valider le fichier envoyé (doit être une image)
+     * @param image
+     * @return
+     */
+    private boolean validateImage(MultipartFile image) {
+        // Todo: réaliser une meilleure validation
+        if (image.getSize() > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @RequestMapping(value = "file", method = RequestMethod.GET,
+            produces = { MediaType.IMAGE_JPEG_VALUE, MediaType.TEXT_PLAIN_VALUE})
+    public ResponseEntity getGiftFile(@RequestHeader(value="X-Auth-Token") String token,
+                                      @RequestParam(value = "giftId") int giftId) throws Exception {
+        logger.info("[Entering] getGiftFile");
+        TokenUtils.getUserFromToken(token);
+        File file = new File(Paths.get("").toAbsolutePath().toString()
+                + File.separator
+                + UPLOAD_PATH
+                + File.separator
+                + giftId
+                + ".jpg");
+        logger.info(String.format("getGiftFile - file: %s", file.getAbsolutePath()));
+        ResponseEntity responseEntity;
+        HttpHeaders responseHeaders = new HttpHeaders();
+        if (file.exists()) {
+            logger.info(String.format("getGiftFile - file %d exists", giftId));
+            responseHeaders.add("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"");
+            responseHeaders.setContentType(MediaType.IMAGE_JPEG);
+            InputStream targetStream = new FileInputStream(file);
+            byte[] media = IOUtils.toByteArray(targetStream);
+            responseEntity = new ResponseEntity<>(media, responseHeaders, HttpStatus.OK);
+        } else {
+            responseHeaders.setContentType(MediaType.TEXT_PLAIN);
+            responseEntity = new ResponseEntity<>("File not found", responseHeaders, HttpStatus.NOT_FOUND);
+        }
+        return responseEntity;
     }
 
     @RequestMapping(value = "gift", method = RequestMethod.PUT,
