@@ -37,8 +37,7 @@ public class User {
     /**
      * Numéro de téléphone de l'utilisateur
      */
-    @JsonIgnore
-    private transient String phoneNumber;
+    private String phoneNumber;
     /**
      * Identifiant GCM de l'utilisateur
      */

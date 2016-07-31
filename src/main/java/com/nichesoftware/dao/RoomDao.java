@@ -4,7 +4,10 @@ import com.nichesoftware.exceptions.GenericException;
 import com.nichesoftware.exceptions.ServerException;
 import com.nichesoftware.model.Room;
 import com.nichesoftware.model.User;
+import com.nichesoftware.services.RestService;
 import com.nichesoftware.utils.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.sql.DataSource;
@@ -15,6 +18,7 @@ import java.util.ArrayList;
  * Created by Kattleya on 22/05/2016.
  */
 public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
+    private static final Logger logger = LoggerFactory.getLogger(RestService.class.getSimpleName());
     /**
      * Data source
      */
@@ -75,7 +79,7 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
             cx = dataSource.getConnection();
 
             // L'utilisateur doit être préalablement ajouté à la salle
-            String sql = "SELECT R.idRoom, R.roomName, R.occasion FROM room AS R JOIN user_room AS UR ON UR.roomId = R.idRoom JOIN user AS U ON U.idUser = UR.userId WHERE U.username = ? AND R.idRoom = ?";
+            String sql = "SELECT R.idRoom, R.roomName, R.occasion FROM room AS R JOIN user_room AS UR ON UR.roomId = R.idRoom JOIN user AS U ON U.idUser = UR.userId WHERE U.username = ? AND R.idRoom = ?;";
 
             ps = cx.prepareStatement(sql);
             ps.setString(1, user.getUsername()); // (1,..) premier point d'interrogation
@@ -98,6 +102,7 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
 
     @Override
     public boolean hasRoom(User user, int roomId) throws ServerException, GenericException {
+        logger.info("[Entering] hasRoom");
         Connection cx = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -106,13 +111,15 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
         try {
             cx = dataSource.getConnection();
 
-            String sql = "SELECT * FROM user_room WHERE userId = ? AND roomId = ?";
+            String sql = "SELECT * FROM user_room WHERE userId = ? AND roomId = ?;";
 
             ps = cx.prepareStatement(sql);
-            ps.setString(1, user.getUsername()); // (1,..) premier point d'interrogation
+            ps.setInt(1, user.getId()); // (1,..) premier point d'interrogation
             ps.setInt(2, roomId);
             rs = ps.executeQuery();
             hasRoom = rs.next();
+            logger.debug(String.format("[hasRoom] Did user [username = %s, id = %d] in room [roomId = %d] ? %b",
+                    user.getUsername(), user.getId(), roomId, hasRoom));
 
         } catch (SQLException e) {
             handleSqlException(e);
@@ -133,7 +140,7 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
 
         try {
             cx = dataSource.getConnection();
-            String sql = "SELECT room.idRoom, room.roomName, room.occasion FROM room JOIN user_room ON user_room.roomId = room.idRoom JOIN user ON user.idUser = user_room.userId WHERE user.username = ?";
+            String sql = "SELECT room.idRoom, room.roomName, room.occasion FROM room JOIN user_room ON user_room.roomId = room.idRoom JOIN user ON user.idUser = user_room.userId WHERE user.username = ?;";
 
             ps = cx.prepareStatement(sql);
             ps.setString(1, user.getUsername()); // (1,..) premier point d'interrogation
@@ -166,7 +173,7 @@ public class RoomDao extends AbstractDaoJdbc implements IRoomDao {
             cx = dataSource.getConnection();
 
             // L'utilisateur doit être préalablement ajouté à la salle
-            String sql = "SELECT R.idRoom, R.roomName, R.occasion FROM room AS R WHERE R.idRoom = ?";
+            String sql = "SELECT R.idRoom, R.roomName, R.occasion FROM room AS R WHERE R.idRoom = ?;";
 
             ps = cx.prepareStatement(sql);
             ps.setInt(1, id);

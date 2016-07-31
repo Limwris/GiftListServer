@@ -42,8 +42,8 @@ public class RestService implements IRestService {
     private IInvitationDao invitationDao;
 
     @Override
-    public Gift addGift(final String username, int roomId, final String giftName,
-                        double giftPrice, double allocatedAmount) throws GenericException, ServerException {
+    public Gift addGift(final String username, int roomId, final String giftName, double giftPrice,
+                        double allocatedAmount, final String description) throws GenericException, ServerException {
         User user = userDao.findByUsername(username);
         if(user == null) {
             throw new AuthenticationException();
@@ -57,7 +57,7 @@ public class RestService implements IRestService {
             throw new GenericException("La salle n'est pas présente dans la liste de l'utilisateur.");
         }
 
-        return giftDao.addGift(user, room, giftName, giftPrice, allocatedAmount);
+        return giftDao.addGift(user, room, giftName, giftPrice, allocatedAmount, description);
     }
 
     @Override
@@ -84,7 +84,8 @@ public class RestService implements IRestService {
     }
 
     @Override
-    public Gift updateGift(String username, int roomId, int giftId, double allocatedAmount) throws ServerException, GenericException {
+    public Gift updateGift(String username, int roomId, int giftId, double allocatedAmount,
+                           final String description) throws ServerException, GenericException {
         User user = userDao.findByUsername(username);
         if(user == null) {
             throw new AuthenticationException();
@@ -100,6 +101,7 @@ public class RestService implements IRestService {
         }
         // Modifier le montant alloué par l'utilisateur
         gift.getAmountByUser().put(user.getUsername(), allocatedAmount);
+        gift.setDescription(description);
         return giftDao.updateGift(user, gift);
     }
 

@@ -12,13 +12,14 @@ import com.nichesoftware.model.User;
 public interface IGiftDao {
     String ID_ROW = "idGifts";
     String NAME_ROW = "name";
+    String DESCRIPTION_ROW = "description";
     String PRICE_ROW = "price";
     String URL_ROW = "url";
     String AMOUNT_ROW = "allocatedAmount";
     String ROOM_ID_ROW = "roomId";
 
-    Gift addGift(User user, Room room, final String giftName,
-                 final double giftPrice, final double allocatedAmount) throws ServerException, GenericException;
+    Gift addGift(User user, Room room, final String giftName, final double giftPrice,
+                 final double allocatedAmount, final String description) throws ServerException, GenericException;
     Gift updateGift(User user, Gift gift) throws ServerException, GenericException;
     void getGifts(User user, Room room) throws ServerException, GenericException;
     Gift getGift(User user, final int giftId) throws ServerException, GenericException ;

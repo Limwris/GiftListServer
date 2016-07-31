@@ -12,9 +12,9 @@ import java.sql.*;
 public class AbstractDaoJdbc {
 
     protected void close(Connection cx, PreparedStatement ps, ResultSet rs) {
-        try { if(rs != null) rs.close(); } catch (SQLException e) { e.printStackTrace(); }
-        try { if(ps != null) ps.close(); } catch (SQLException e) { e.printStackTrace(); }
-        try { if(cx != null) cx.close(); } catch (SQLException e) { e.printStackTrace(); }
+        try { if(rs != null) rs.close(); } catch (SQLException ignored) { }
+        try { if(ps != null) ps.close(); } catch (SQLException ignored) { }
+        try { if(cx != null) cx.close(); } catch (SQLException ignored) { }
     }
 
     /**

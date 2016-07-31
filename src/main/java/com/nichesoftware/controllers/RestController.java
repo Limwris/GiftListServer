@@ -101,23 +101,10 @@ public class RestController {
         User user = TokenUtils.getUserFromToken(token);
         GiftDto giftDto = new Gson().fromJson(giftDtoString, GiftDto.class);
         Gift gift = restService.addGift(user.getUsername(), giftDto.getRoomId(), giftDto.getName(),
-                giftDto.getPrice(), giftDto.getAmount());
+                giftDto.getPrice(), giftDto.getAmount(), giftDto.getDescription());
 
         if (file != null) {
-            logger.info(String.format("addGift - File [filename: %s, content-type: %s, size: %d]",
-                    file.getOriginalFilename(), file.getContentType(), file.getSize()));
-            if (validateImage(file)) {
-                logger.info("addGift - valid image");
-                File image = new File(Paths.get("").toAbsolutePath().toString()
-                        + File.separator
-                        + UPLOAD_PATH
-                        + File.separator
-                        + gift.getId()
-                        + ".jpg");
-                FileUtils.writeByteArrayToFile(image, file.getBytes());
-                logger.info(String.format("addGift - Image has been successfully stored on the following location: %s",
-                        image.getAbsolutePath()));
-            }
+            uploadImage(file, String.valueOf(gift.getId()));
         }
         return gift;
     }
@@ -136,33 +123,21 @@ public class RestController {
         }
     }
 
-    @RequestMapping(value = "file", method = RequestMethod.GET,
-            produces = { MediaType.IMAGE_JPEG_VALUE, MediaType.TEXT_PLAIN_VALUE})
-    public ResponseEntity getGiftFile(@RequestHeader(value="X-Auth-Token") String token,
-                                      @RequestParam(value = "giftId") int giftId) throws Exception {
-        logger.info("[Entering] getGiftFile");
-        TokenUtils.getUserFromToken(token);
-        File file = new File(Paths.get("").toAbsolutePath().toString()
-                + File.separator
-                + UPLOAD_PATH
-                + File.separator
-                + giftId
-                + ".jpg");
-        logger.info(String.format("getGiftFile - file: %s", file.getAbsolutePath()));
-        ResponseEntity responseEntity;
-        HttpHeaders responseHeaders = new HttpHeaders();
-        if (file.exists()) {
-            logger.info(String.format("getGiftFile - file %d exists", giftId));
-            responseHeaders.add("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"");
-            responseHeaders.setContentType(MediaType.IMAGE_JPEG);
-            InputStream targetStream = new FileInputStream(file);
-            byte[] media = IOUtils.toByteArray(targetStream);
-            responseEntity = new ResponseEntity<>(media, responseHeaders, HttpStatus.OK);
-        } else {
-            responseHeaders.setContentType(MediaType.TEXT_PLAIN);
-            responseEntity = new ResponseEntity<>("File not found", responseHeaders, HttpStatus.NOT_FOUND);
+    private void uploadImage(MultipartFile file, final String basename) throws Exception {
+        logger.info(String.format("uploadImage - File [filename: %s, content-type: %s, size: %d]",
+                file.getOriginalFilename(), file.getContentType(), file.getSize()));
+        if (validateImage(file)) {
+            logger.info("uploadImage - valid image");
+            File image = new File(Paths.get("").toAbsolutePath().toString()
+                    + File.separator
+                    + UPLOAD_PATH
+                    + File.separator
+                    + basename
+                    + ".jpg");
+            FileUtils.writeByteArrayToFile(image, file.getBytes());
+            logger.info(String.format("uploadImage - Image has been successfully stored on the following location: %s",
+                    image.getAbsolutePath()));
         }
-        return responseEntity;
     }
 
     @RequestMapping(value = "gift", method = RequestMethod.PUT,
@@ -171,7 +146,22 @@ public class RestController {
                            @RequestBody GiftDto giftDto) throws Exception {
         logger.info("[Entering] updateGift");
         User user = TokenUtils.getUserFromToken(token);
-        return restService.updateGift(user.getUsername(), giftDto.getRoomId(), giftDto.getId(), giftDto.getAmount());
+        return restService.updateGift(user.getUsername(), giftDto.getRoomId(), giftDto.getId(),
+                giftDto.getAmount(), giftDto.getDescription());
+    }
+
+    @RequestMapping(value = "giftfile", method = RequestMethod.POST,
+            produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public void updateGiftFile(@RequestHeader(value="X-Auth-Token") String token,
+                               @RequestPart("body") String giftDtoString,
+                               @RequestPart("file") MultipartFile file) throws Exception {
+        logger.info("[Entering] addGift");
+        TokenUtils.getUserFromToken(token);
+        GiftDto giftDto = new Gson().fromJson(giftDtoString, GiftDto.class);
+
+        if (file != null) {
+            uploadImage(file, String.valueOf(giftDto.getId()));
+        }
     }
 
     @RequestMapping(value = "room/{roomId}", method = RequestMethod.GET,

@@ -15,15 +15,6 @@
         <mvc:message-converters>
             <bean class="org.springframework.http.converter.json.GsonHttpMessageConverter" />
             <bean class="org.springframework.http.converter.StringHttpMessageConverter" />
-            <bean class="org.springframework.http.converter.ByteArrayHttpMessageConverter">
-                <property name="supportedMediaTypes">
-                    <list>
-                        <value>image/jpeg</value>
-                        <value>image/png</value>
-                    </list>
-                </property>
-            </bean>
-            <!-- other HttpMessageConverters you need here -->
         </mvc:message-converters>
     </mvc:annotation-driven>
 

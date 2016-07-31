@@ -40,6 +40,7 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
                 if (gift == null) {
                     gift = new Gift(giftId);
                     gift.setPrice(rs.getDouble(PRICE_ROW));
+                    gift.setDescription(rs.getString(DESCRIPTION_ROW));
                     gift.setName(rs.getString(NAME_ROW));
                     room.addGift(gift);
                 }
@@ -74,6 +75,7 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
                     if (gift == null) {
                         gift = new Gift(giftId);
                         gift.setName(rs.getString(NAME_ROW));
+                        gift.setDescription(rs.getString(DESCRIPTION_ROW));
                         gift.setPrice(rs.getDouble(PRICE_ROW));
                     }
                     gift.getAmountByUser().put(rs.getString(IUserDao.USERNAME_ROW), rs.getDouble(AMOUNT_ROW));
@@ -97,8 +99,8 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
     }
 
     @Override
-    public Gift addGift(User user, Room room, final String giftName,
-                        final double giftPrice, final double allocatedAmount) throws ServerException, GenericException {
+    public Gift addGift(User user, Room room, final String giftName, final double giftPrice,
+                        final double allocatedAmount, final String description) throws ServerException, GenericException {
         Connection cx = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -107,11 +109,12 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
         try {
             cx = dataSource.getConnection();
 
-            String sql = "INSERT INTO gifts(name, price, roomId) VALUES (?, ?, ?);";
+            String sql = "INSERT INTO gifts(name, price, roomId, description) VALUES (?, ?, ?, ?);";
             ps = cx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, giftName);
             ps.setDouble(2, giftPrice);
             ps.setInt(3, room.getId());
+            ps.setString(4, description);
 
             ps.executeUpdate();
 
@@ -120,6 +123,7 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
                 int giftId = rs.getInt(1);
                 gift = new Gift(giftId);
                 gift.setName(giftName);
+                gift.setDescription(description);
                 gift.setPrice(giftPrice);
                 gift.getAmountByUser().put(user.getUsername(), allocatedAmount);
 
@@ -149,11 +153,13 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
 
         try {
             cx = dataSource.getConnection();
-            String sql= "UPDATE user_gift SET allocatedAmount = ? WHERE userId = ? AND giftId = ?;";
+            String sql= "UPDATE user_gift AS UG, gifts AS G SET UG.allocatedAmount = ?, G.description = ? WHERE UG.userId = ? AND UG.giftId = ? AND G.idGifts = ?;";
             ps = cx.prepareStatement(sql);
             ps.setDouble(1, gift.getAmountByUser().get(user.getUsername()));
-            ps.setInt(2, user.getId());
-            ps.setInt(3, gift.getId());
+            ps.setString(2, gift.getDescription());
+            ps.setInt(3, user.getId());
+            ps.setInt(4, gift.getId());
+            ps.setInt(5, gift.getId());
 
             int retVal = ps.executeUpdate();
 

@@ -28,6 +28,10 @@ public class Gift {
      */
     private String name;
     /**
+     * Description du cadeau
+     */
+    private String description;
+    /**
      * Url pointant vers un site proposant le cadeau
      */
     private String url;
@@ -63,6 +67,14 @@ public class Gift {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Getter sur la description du cadeau
+     * @return description
+     */
+    public String getDescription() {
+        return description;
     }
 
     /**
@@ -104,6 +116,14 @@ public class Gift {
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * Setter sur la description du cadeau
+     * @param description
+     */
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     /**
