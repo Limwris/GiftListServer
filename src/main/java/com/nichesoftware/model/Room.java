@@ -18,14 +18,6 @@ public class Room {
      */
     private String roomName;
     /**
-     * Prénom de la personne concernée par la salle
-     */
-    private String firstName;
-    /**
-     * Nom de la personne concernée par la salle
-     */
-    private String lastName;
-    /**
      * Occasion du cadeau
      */
     private String occasion;
@@ -34,7 +26,6 @@ public class Room {
      */
     @JsonIgnore
     private List<Gift> giftList = new ArrayList<Gift>();
-
 
     /**
      * Contructeur par défaut
@@ -76,38 +67,6 @@ public class Room {
      */
     public void setRoomName(String roomName) {
         this.roomName = roomName;
-    }
-
-    /**
-     * Getter sur le prénom de la personne concernée par la salle
-     * @return firstName
-     */
-    public String getFirstName() {
-        return firstName;
-    }
-
-    /**
-     * Setter sur le prénom de la personne concernée par la salle
-     * @param firstName
-     */
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    /**
-     * Getter sur le nom de la personne concernée par la salle
-     * @return lastName
-     */
-    public String getLastName() {
-        return lastName;
-    }
-
-    /**
-     * Setter sur le nom de la personne concernée par la salle
-     * @param lastName
-     */
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
     }
 
     /**

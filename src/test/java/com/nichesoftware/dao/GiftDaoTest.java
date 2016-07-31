@@ -58,6 +58,6 @@ public class GiftDaoTest {
         Room room = new Room(1, "Anniversaire de Jean-Luc", "anniversaire");
 
         // Act
-        sut.addGift(u, room, "Train", 129, 0);
+        sut.addGift(u, room, "Train", 129, 0, "Zoli description");
     }
 }

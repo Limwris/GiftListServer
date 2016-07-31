@@ -44,6 +44,7 @@ public class RestService implements IRestService {
     @Override
     public Gift addGift(final String username, int roomId, final String giftName, double giftPrice,
                         double allocatedAmount, final String description) throws GenericException, ServerException {
+        logger.info("[Entering] addGift");
         User user = userDao.findByUsername(username);
         if(user == null) {
             throw new AuthenticationException();
@@ -86,6 +87,7 @@ public class RestService implements IRestService {
     @Override
     public Gift updateGift(String username, int roomId, int giftId, double allocatedAmount,
                            final String description) throws ServerException, GenericException {
+        logger.info("[Entering] updateGift");
         User user = userDao.findByUsername(username);
         if(user == null) {
             throw new AuthenticationException();
@@ -97,6 +99,7 @@ public class RestService implements IRestService {
 
         Gift gift = room.getGiftById(giftId);
         if (gift == null) {
+            logger.error("[updateGift] Le cadeau n'existe pas dans la salle passée en paramètre");
             throw new GenericException("Le cadeau n'existe pas dans la salle passée en paramètre");
         }
         // Modifier le montant alloué par l'utilisateur

@@ -5,6 +5,8 @@ import com.nichesoftware.exceptions.ServerException;
 import com.nichesoftware.model.Gift;
 import com.nichesoftware.model.Room;
 import com.nichesoftware.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.sql.DataSource;
@@ -14,6 +16,7 @@ import java.sql.*;
  * Created by n_che on 02/05/2016.
  */
 public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
+    private static final Logger logger = LoggerFactory.getLogger(GiftDao.class.getSimpleName());
     /**
      * Data source
      */
@@ -148,6 +151,7 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
 
     @Override
     public Gift updateGift(User user, Gift gift) throws ServerException, GenericException {
+        logger.info("[Entering] updateGift");
         Connection cx = null;
         PreparedStatement ps = null;
 
@@ -163,11 +167,13 @@ public class GiftDao extends AbstractDaoJdbc implements IGiftDao {
 
             int retVal = ps.executeUpdate();
 
-            if (retVal != 1) {
+            if (retVal > 2) {
+                logger.error("[updateGift] La mise à jour du cadeau a échoué.");
                 throw new GenericException("La mise à jour du cadeau a échoué.");
             }
 
         } catch (SQLException e) {
+            logger.error("[updateGift] SQL error {}.", e);
             handleSqlException(e);
         } finally {
             close(cx, ps, null);

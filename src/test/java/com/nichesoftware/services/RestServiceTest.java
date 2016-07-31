@@ -17,9 +17,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -65,13 +62,13 @@ public class RestServiceTest {
                 room.addGift(gift);
                 return null;
             }
-        }).when(giftDao).addGift(eq(user), any(Room.class), anyString(), anyDouble(), anyDouble());
+        }).when(giftDao).addGift(eq(user), any(Room.class), anyString(), anyDouble(), anyDouble(), anyString());
 
         // Act
-        sut.addGift("jean-pierre", 1, "Train", 129, 0);
+        sut.addGift("jean-pierre", 1, "Train", 129, 0, "Zolie description");
 
         // Assert
-        verify(giftDao).addGift(eq(user), any(Room.class), anyString(), anyDouble(), anyDouble());
+        verify(giftDao).addGift(eq(user), any(Room.class), anyString(), anyDouble(), anyDouble(), anyString());
         Assert.assertEquals("Le cadeau n'a pas été correctement ajouté.", room.getGiftList().size(), 1);
         Assert.assertEquals("Le nom du cadeau ne correspond pas.", room.getGiftList().get(0).getName(), "Train");
     }

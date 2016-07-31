@@ -155,7 +155,7 @@ public class RestController {
     public void updateGiftFile(@RequestHeader(value="X-Auth-Token") String token,
                                @RequestPart("body") String giftDtoString,
                                @RequestPart("file") MultipartFile file) throws Exception {
-        logger.info("[Entering] addGift");
+        logger.info("[Entering] updateGiftFile");
         TokenUtils.getUserFromToken(token);
         GiftDto giftDto = new Gson().fromJson(giftDtoString, GiftDto.class);
 
@@ -223,13 +223,13 @@ public class RestController {
         return TokenUtils.generateUserToken(user);
     }
 
-    @RequestMapping(value = "gcm/{registerId}", method = RequestMethod.POST,
+    @RequestMapping(value = "gcm", method = RequestMethod.POST,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public boolean registerDevice(@RequestHeader(value="X-Auth-Token") String token,
-                                  @PathVariable final String registerId) throws Exception {
+                                  @RequestBody final GCMRegistrationDto registrationDto) throws Exception {
         logger.info("[Entering] registerDevice");
         User user = TokenUtils.getUserFromToken(token);
-        restService.updateGcmToken(user.getUsername(), registerId);
+        restService.updateGcmToken(user.getUsername(), registrationDto.getRegisterId());
         return true;
     }
 
