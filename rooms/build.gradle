@@ -1,0 +1,69 @@
+group 'com.nichesoftware'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'war'
+apply plugin: 'jetty'
+apply plugin: 'idea'
+
+sourceCompatibility = 1.7
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Spring
+	compile ('org.springframework:spring-webmvc:4.2.6.RELEASE') {
+        exclude group: "commons-logging", module: "commons-logging"
+	}
+    compile group: 'org.springframework', name: 'spring-jdbc', version: '4.2.6.RELEASE'
+	// JDBC connector
+	compile 'mysql:mysql-connector-java:5.1.38'
+
+	// Jackson, in order to return JSON
+	compile group: 'org.codehaus.jackson', name: 'jackson-mapper-asl', version: '1.9.12'
+
+    // Log: logback
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.7'
+
+    // Domain
+    compile project(':domain')
+
+    // Generic REST methods/classes
+    compile project(':common-server')
+
+    ////////////////////
+    // Test
+
+    // JUnit
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    // DB unit
+    testCompile 'org.dbunit:dbunit:2.5.2'
+    // Mockito
+    testCompile 'org.mockito:mockito-all:1.10.19'
+    // spring-test
+    testCompile group: 'org.springframework', name: 'spring-test', version: '4.2.6.RELEASE'
+    // spring-test-dbunit
+    testCompile group: 'com.github.springtestdbunit', name: 'spring-test-dbunit', version: '1.3.0'
+    // hsqldb
+    testCompile group: 'com.h2database', name: 'h2', version: '1.4.192'
+}
+
+war {
+    webInf {
+        include "src/main/webapp/resources/**"
+    }
+}
+
+// Embeded Jetty for testing
+jettyRun {
+    jettyEnvXml = file('src/main/webapp/WEB-INF/jetty-env.xml')
+	contextPath = "giftlist"
+	httpPort = 8092
+}
+
+jettyRunWar {
+	contextPath = "giftlist"
+	httpPort = 8092
+}
