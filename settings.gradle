@@ -1,2 +1,4 @@
 rootProject.name = 'giftlist'
+include 'domain'
+include 'common-server'
 
