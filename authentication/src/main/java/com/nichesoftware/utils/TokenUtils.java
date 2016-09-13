@@ -3,6 +3,7 @@ package com.nichesoftware.utils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.nichesoftware.User;
+import com.nichesoftware.service.exception.GenericException;
 import com.nichesoftware.service.exception.NotAuthorizedException;
 import org.apache.commons.codec.binary.Base64;
 
@@ -16,12 +17,19 @@ import java.util.Arrays;
  * Created by n_che on 28/04/2016.
  */
 public final class TokenUtils {
+    // Fields   --------------------------------------------------------------------------------------------------------
     private static final String SEPARATOR = ".";
     private static final String ESCAPED_SEPARATOR = "\\.";
     private static final String HMAC_KEY = "Bonjour, mon nom est Scott Summers, et je suis un X-MEN";
     private static final String HMAC_ALGORITHM = "HmacSHA1";
     private static final String DATE_FORMAT = "yyyy-MM-dd";
 
+    // Error message
+    private static final String HMAC_ERROR_MESSAGE = "Impossible de générer le HMAC du token.";
+    private static final String INVALID_TOKEN_ERROR_MESSAGE = "Le token n'est pas valide.";
+    private static final String INVALID_USER_RETRIEVE_ERROR_MESSAGE = "Impossible de retrouver l'utilisateur à l'origine de la requête.";
+
+    // Constructor   ---------------------------------------------------------------------------------------------------
     /**
      * Constructeur privé
      */
@@ -29,6 +37,13 @@ public final class TokenUtils {
         // Nothing
     }
 
+    // Methods   -------------------------------------------------------------------------------------------------------
+    /**
+     * Méthode permettant de récupérer un utilisateur à partir d'un token
+     * @param token     - Token
+     * @return User
+     * @throws NotAuthorizedException
+     */
     public static User getUserFromToken(String token) throws NotAuthorizedException {
         final Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
         final String[] parts = token.split(ESCAPED_SEPARATOR);
@@ -47,16 +62,26 @@ public final class TokenUtils {
 //                    }
                 }
             } catch (IllegalArgumentException e) {
-                throw new NotAuthorizedException("Impossible de retrouver l'utilisateur à l'origine de la requête.");
+                NotAuthorizedException exception = new NotAuthorizedException();
+                exception.setErrorMessage(INVALID_USER_RETRIEVE_ERROR_MESSAGE);
+                throw exception;
             }
         }
 
         if (user == null) {
-            throw new NotAuthorizedException("Le token n'est pas valide.");
+            NotAuthorizedException exception = new NotAuthorizedException();
+            exception.setErrorMessage(INVALID_TOKEN_ERROR_MESSAGE);
+            throw exception;
         }
         return user;
     }
 
+    /**
+     * Méthode permettant de générer un token à partir d'un utilisateur
+     * @param user      - Utilisateur
+     * @return token
+     * @throws NotAuthorizedException
+     */
     public static String generateUserToken(User user) throws NotAuthorizedException {
         final Gson gson = new GsonBuilder().setDateFormat(DATE_FORMAT).create();
         byte[] userBytes = gson.toJson(user).getBytes();
@@ -68,6 +93,12 @@ public final class TokenUtils {
         return sb.toString();
     }
 
+    /**
+     * Méthode de génération du HMC
+     * @param message
+     * @return byte[]
+     * @throws NotAuthorizedException
+     */
     private static byte[] createHmac(byte[] message) throws NotAuthorizedException {
         SecretKeySpec keySpec = new SecretKeySpec(HMAC_KEY.getBytes(), HMAC_ALGORITHM);
 
@@ -77,10 +108,10 @@ public final class TokenUtils {
             mac = Mac.getInstance(HMAC_ALGORITHM);
             mac.init(keySpec);
             result = mac.doFinal(message);
-        } catch (NoSuchAlgorithmException e) {
-            throw new NotAuthorizedException("Impossible de générer le HMAC du token.");
-        } catch (InvalidKeyException e) {
-            throw new NotAuthorizedException("Impossible de générer le HMAC du token.");
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            NotAuthorizedException exception = new NotAuthorizedException();
+            exception.setErrorMessage(HMAC_ERROR_MESSAGE);
+            throw exception;
         }
         return result;
     }
