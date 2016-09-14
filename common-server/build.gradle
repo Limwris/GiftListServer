@@ -17,6 +17,12 @@ dependencies {
         exclude group: "commons-logging", module: "commons-logging"
 	}
 
+    // IOUtils
+    compile group: 'commons-io', name: 'commons-io', version: '2.5'
+
+	// Gson
+	compile 'com.google.code.gson:gson:2.6.2'
+
     // Log: logback
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.7'
 
