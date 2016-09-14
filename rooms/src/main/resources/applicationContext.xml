@@ -18,6 +18,18 @@
         </mvc:message-converters>
     </mvc:annotation-driven>
 
+    <bean class="org.springframework.web.client.RestTemplate">
+        <property name="errorHandler">
+            <bean class="com.nichesoftware.controller.SpringResponseErrorHandler" />
+        </property>
+        <property name="messageConverters">
+            <list>
+                <bean class="org.springframework.http.converter.StringHttpMessageConverter" />
+                <bean class="org.springframework.http.converter.json.GsonHttpMessageConverter" />
+            </list>
+        </property>
+    </bean>
+
     <bean id="service" class="com.nichesoftware.service.RoomService">
         <property name="roomDAO" ref="dao" />
     </bean>
